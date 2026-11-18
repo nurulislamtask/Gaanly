@@ -8,6 +8,7 @@ export interface Appearance {
   compactSidebar: boolean;
   albumColumn: boolean;
   texture: boolean;
+  glass: boolean;
   homeShortcuts: boolean;
   homeRecent: boolean;
   homeFavorites: boolean;
@@ -19,6 +20,7 @@ export const DEFAULT_APPEARANCE: Appearance = {
   compactSidebar: false,
   albumColumn: true,
   texture: true,
+  glass: true,
   homeShortcuts: true,
   homeRecent: true,
   homeFavorites: true,
@@ -59,7 +61,7 @@ function read(): Appearance {
   }
 }
 
-/** Applies what CSS needs: the accent colours and two switches read by stylesheets (compact rail, texture). */
+/** Applies what CSS needs: the accent colours and switches read by stylesheets (compact rail, texture, glass). */
 function apply(a: Appearance) {
   const root = document.documentElement;
   const custom = a.accent !== DEFAULT_ACCENT;
@@ -75,6 +77,8 @@ function apply(a: Appearance) {
   else delete root.dataset.rail;
   if (a.texture) delete root.dataset.texture;
   else root.dataset.texture = "off";
+  if (a.glass) delete root.dataset.glass;
+  else root.dataset.glass = "off";
   try {
     localStorage.setItem(KEY, JSON.stringify(a));
     if (custom) localStorage.setItem(CSS_KEY, accentCss(a.accent));

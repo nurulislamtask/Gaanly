@@ -4,6 +4,9 @@ interface DesktopBridge {
   setTheme: (theme: "dark" | "light") => void;
   /** Missing in desktop builds older than 1.2. */
   setLanguage?: (lang: string) => void;
+  /** Missing in desktop builds older than 1.0.0 (no in-app updates). */
+  installUpdate?: (assets: { name: string; url: string }[]) => Promise<string>;
+  onUpdateProgress?: (callback: (percent: number) => void) => () => void;
 }
 
 export const desktop = (window as Window & { gaanlyDesktop?: DesktopBridge }).gaanlyDesktop;

@@ -9,6 +9,7 @@ import { TitleBar } from "./components/TitleBar";
 import { desktop } from "./lib/desktop";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { Toasts } from "./components/Toasts";
+import { UpdateBanner } from "./components/UpdateBanner";
 import { TrackMenu } from "./components/TrackMenu";
 import { FloatingVideo, Theater } from "./components/Video";
 import { MD, useMediaQuery } from "./hooks/useMediaQuery";
@@ -17,6 +18,7 @@ import { getT } from "./i18n";
 import { capabilities } from "./lib/api";
 import { cn } from "./lib/format";
 import { legacyRedirect, NOW_PLAYING_HASH, paths } from "./lib/routes";
+import { startAutoUpdateChecks } from "./lib/update";
 import { usePlayer } from "./player/player";
 import { useLibrary } from "./stores/library";
 import { openSettings, useSystem } from "./stores/system";
@@ -49,6 +51,9 @@ export default function App() {
   useEffect(() => {
     void loadLibrary();
   }, [loadLibrary]);
+
+  // New Gaanly releases: checked on start, every few hours and when the app comes back (desktop and phone apps).
+  useEffect(() => startAutoUpdateChecks(), []);
 
   // Check yt-dlp shortly after start and say so once if something needs doing (not on Android: no yt-dlp there).
   useEffect(() => {
@@ -106,14 +111,14 @@ export default function App() {
   };
 
   return (
-    <div className={cn("grain flex h-dvh flex-col bg-bg md:gap-2 md:p-2", desktop && "md:pt-0")}>
+    <div className={cn("grain aurora flex h-dvh flex-col md:gap-2 md:p-2", desktop && "md:pt-0")}>
       {desktop && <TitleBar />}
       <div className="flex min-h-0 flex-1 md:gap-2">
         <Rail />
         <main
           ref={main}
           className={cn(
-            "scroll-area relative min-w-0 flex-1 overflow-y-auto md:rounded-[20px] md:bg-surface-1 md:ring-1 md:ring-line",
+            "scroll-area relative min-w-0 flex-1 overflow-y-auto md:pane md:rounded-[20px] md:ring-1 md:ring-line",
             hasTrack ? "pb-[calc(152px+env(safe-area-inset-bottom))]" : "pb-[calc(88px+env(safe-area-inset-bottom))]",
             "md:pb-0",
           )}
@@ -156,6 +161,7 @@ export default function App() {
       <AddToPlaylistDialog />
       <ShortcutsDialog />
       <SettingsDialog />
+      <UpdateBanner />
       <Toasts />
     </div>
   );

@@ -13,6 +13,7 @@ import { capabilities, type Channel } from "../lib/api";
 import { cn } from "../lib/format";
 import { useSystem } from "../stores/system";
 import { useUi } from "../stores/ui";
+import { AboutSection } from "./AboutSection";
 import { BackupSection } from "./BackupSection";
 import { AccentPicker, LayoutSection } from "./CustomizeSection";
 import { Modal } from "./Modal";
@@ -155,6 +156,8 @@ export function SettingsDialog() {
         <LayoutSection />
 
         <BackupSection />
+
+        <AboutSection />
 
         {capabilities.engineSettings && (
         <section className="flex flex-col gap-3">

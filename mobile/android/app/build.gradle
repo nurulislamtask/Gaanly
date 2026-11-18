@@ -4,13 +4,17 @@ apply plugin: 'com.android.application'
 def appVersion = new groovy.json.JsonSlurper().parse(file('../../package.json')).version
 def versionParts = appVersion.tokenize('.').collect { it.find(/\d+/).toInteger() }
 
-// Release signing, kept out of the repository: android/keystore.properties locally, environment variables in CI.
-// Without either, the release APK is built unsigned.
+// Release signing: android/keystore.properties locally, or the GAANLY_KEYSTORE* variables in CI (repository secrets).
+// Without either, the app is signed with gaanly-update-key.jks, which is in the repository on purpose: Android only
+// installs an update signed with the same key as the installed app, so every build must use one stable key or the
+// in-app update would fail. Add your own key (secrets) BEFORE you publish widely: changing it later means
+// everyone has to uninstall and reinstall once.
 def keystoreProps = new Properties()
 def keystoreFile = rootProject.file('keystore.properties')
 if (keystoreFile.exists()) keystoreFile.withInputStream { keystoreProps.load(it) }
 def signingValue = { String prop, String env -> keystoreProps.getProperty(prop) ?: System.getenv(env) }
-def releaseStore = signingValue('storeFile', 'GAANLY_KEYSTORE')
+def releaseStore = signingValue('storeFile', 'GAANLY_KEYSTORE') ?: 'gaanly-update-key.jks'
+def usingFallbackKey = releaseStore == 'gaanly-update-key.jks'
 
 android {
     namespace = "app.gaanly.android"
@@ -32,9 +36,10 @@ android {
         if (releaseStore) {
             release {
                 storeFile rootProject.file(releaseStore)
-                storePassword signingValue('storePassword', 'GAANLY_KEYSTORE_PASSWORD')
-                keyAlias signingValue('keyAlias', 'GAANLY_KEY_ALIAS')
-                keyPassword signingValue('keyPassword', 'GAANLY_KEY_PASSWORD')
+                storeType 'pkcs12'
+                storePassword signingValue('storePassword', 'GAANLY_KEYSTORE_PASSWORD') ?: (usingFallbackKey ? 'gaanly-public' : null)
+                keyAlias signingValue('keyAlias', 'GAANLY_KEY_ALIAS') ?: (usingFallbackKey ? 'gaanly' : null)
+                keyPassword signingValue('keyPassword', 'GAANLY_KEY_PASSWORD') ?: (usingFallbackKey ? 'gaanly-public' : null)
             }
         }
     }

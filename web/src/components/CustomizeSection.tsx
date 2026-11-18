@@ -110,6 +110,7 @@ export function LayoutSection() {
           onChange={(v) => a.set({ compactSidebar: v })}
         />
         <SwitchRow label={t.customize.albumColumn} checked={a.albumColumn} onChange={(v) => a.set({ albumColumn: v })} />
+        <SwitchRow label={t.customize.glass} body={t.customize.glassBody} checked={a.glass} onChange={(v) => a.set({ glass: v })} />
         <SwitchRow label={t.customize.texture} checked={a.texture} onChange={(v) => a.set({ texture: v })} />
       </div>
 

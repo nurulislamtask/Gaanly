@@ -29,6 +29,7 @@
         var a = JSON.parse(localStorage.getItem("gaanly:appearance") || "{}");
         if (a.compactSidebar === true) document.documentElement.dataset.rail = "compact";
         if (a.texture === false) document.documentElement.dataset.texture = "off";
+        if (a.glass === false) document.documentElement.dataset.glass = "off";
       } catch (e) {}
     </script>
   </head>

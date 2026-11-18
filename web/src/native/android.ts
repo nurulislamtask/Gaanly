@@ -1,14 +1,41 @@
 import { App } from "@capacitor/app";
 import { Capacitor, registerPlugin, SystemBars, SystemBarsStyle } from "@capacitor/core";
+import { registerNativeUpdater } from "../lib/update";
 import { installTvMode } from "../tv/tvMode";
 
-/** GaanlyDevicePlugin.java: what kind of device this is. */
-const Device = registerPlugin<{ info(): Promise<{ tv: boolean }> }>("GaanlyDevice", {
-  web: () => ({ info: async () => ({ tv: false }) }),
+/** GaanlyDevicePlugin.java: what kind of device this is, and the in-app updater. */
+interface DevicePlugin {
+  info(): Promise<{ tv: boolean }>;
+  installUpdate(options: { url: string }): Promise<void>;
+  addListener(event: "updateProgress", fn: (e: { percent: number }) => void): Promise<{ remove: () => Promise<void> }>;
+}
+const Device = registerPlugin<DevicePlugin>("GaanlyDevice", {
+  web: () => ({
+    info: async () => ({ tv: false }),
+    installUpdate: async () => {},
+    addListener: async () => ({ remove: async () => {} }),
+  }),
 });
 
 // How the app fits into Android itself: Android TV, the Back button and the system bars.
 if (Capacitor.isNativePlatform()) {
+  // New releases: Android downloads and installs the APK itself; iOS can only point to the new .ipa.
+  if (Capacitor.getPlatform() === "android") {
+    registerNativeUpdater({
+      platform: "android",
+      install: async (url, onProgress) => {
+        const handle = await Device.addListener("updateProgress", (e) => onProgress(e.percent));
+        try {
+          await Device.installUpdate({ url });
+        } finally {
+          void handle.remove();
+        }
+      },
+    });
+  } else {
+    registerNativeUpdater({ platform: "ios" });
+  }
+
   // One APK for phones and TVs: on a TV, switch to the remote-friendly 10-foot UI (web/src/tv).
   void Device.info()
     .then(({ tv }) => {

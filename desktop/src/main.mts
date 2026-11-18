@@ -1,5 +1,8 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { chmodSync, createWriteStream, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow, ipcMain, Menu, screen, shell } from "electron";
 import type { RunningServer } from "../../server/src/app.js";
@@ -197,6 +200,89 @@ ipcMain.on("gaanly:lang", (_event, next: unknown) => {
     writeFileSync(settingsFile, JSON.stringify({ lang }));
   } catch {
     /* not critical: the splash falls back to English */
+  }
+});
+
+// ---- In-app updates -------------------------------------------------------------------------------------------
+// The web app checks Gaanly's GitHub releases and, when the user taps Update, sends the release's files here.
+// Windows: the installer runs silently and the app reopens. Linux AppImage: the file replaces itself and restarts.
+// macOS and Linux .deb: the downloaded package is opened (dragging to Applications / the software installer).
+const RELEASE_PREFIX = "https://github.com/nurulislamtask/gaanly/releases/download/";
+
+interface UpdateAsset {
+  name: string;
+  url: string;
+}
+
+function pickUpdateAsset(assets: UpdateAsset[]): UpdateAsset | undefined {
+  const arch = process.arch === "arm64" ? "arm64" : "x64";
+  const find = (re: RegExp) => assets.find((a) => re.test(a.name));
+  if (process.platform === "win32") return find(/-Windows\.exe$/);
+  if (isMac) return find(new RegExp(`-macOS-${arch}\\.dmg$`));
+  return process.env.APPIMAGE ? find(new RegExp(`-Linux-${arch}\\.AppImage$`)) : find(new RegExp(`-Linux-${arch}\\.deb$`));
+}
+
+async function download(url: string, file: string, onProgress: (percent: number) => void) {
+  const res = await fetch(url, { redirect: "follow", headers: { "user-agent": "Gaanly-Updater" } });
+  if (!res.ok || !res.body) throw new Error(`Download failed (${res.status}).`);
+  const total = Number(res.headers.get("content-length")) || 0;
+  let done = 0;
+  let last = -1;
+  const source = Readable.fromWeb(res.body as import("node:stream/web").ReadableStream<Uint8Array>);
+  source.on("data", (chunk: Buffer) => {
+    done += chunk.length;
+    if (!total) return;
+    const percent = Math.floor((done * 100) / total);
+    if (percent !== last) {
+      last = percent;
+      onProgress(percent);
+    }
+  });
+  await pipeline(source, createWriteStream(file));
+  if (done < 1024 * 1024) throw new Error("The download is incomplete.");
+}
+
+let updating = false;
+
+ipcMain.handle("gaanly:install-update", async (event, input: unknown) => {
+  if (!app.isPackaged) throw new Error("Updates only work in the installed app.");
+  if (updating) throw new Error("Already downloading.");
+  const assets = (Array.isArray(input) ? input : []).filter(
+    (a): a is UpdateAsset =>
+      !!a && typeof a.name === "string" && typeof a.url === "string" && a.url.toLowerCase().startsWith(RELEASE_PREFIX) && /^Gaanly-Setup-[\w.-]+$/.test(a.name),
+  );
+  const asset = pickUpdateAsset(assets);
+  if (!asset) throw new Error("No download for this system in the new release.");
+
+  updating = true;
+  try {
+    const progress = (percent: number) => event.sender.send("gaanly:update-progress", percent);
+    const dir = path.join(app.getPath("temp"), "gaanly-update");
+    mkdirSync(dir, { recursive: true });
+
+    if (process.platform === "linux" && process.env.APPIMAGE && asset.name.endsWith(".AppImage")) {
+      const target = process.env.APPIMAGE;
+      const fresh = `${target}.new`;
+      await download(asset.url, fresh, progress);
+      chmodSync(fresh, 0o755);
+      renameSync(fresh, target);
+      app.relaunch({ execPath: target });
+      setTimeout(() => app.quit(), 400);
+      return "relaunching";
+    }
+
+    const file = path.join(dir, asset.name);
+    await download(asset.url, file, progress);
+    if (process.platform === "win32") {
+      // /S: no wizard. --updated --force-run: open Gaanly again when the install is done.
+      spawn(file, ["/S", "--updated", "--force-run"], { detached: true, stdio: "ignore" }).unref();
+      setTimeout(() => app.quit(), 400);
+      return "installing";
+    }
+    await shell.openPath(file);
+    return "opened";
+  } finally {
+    updating = false;
   }
 });
 

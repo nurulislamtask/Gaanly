@@ -1,0 +1,45 @@
+# One click to ship a new version: Actions tab → "Publish a new version" → Run workflow → type 1.0.1.
+# It sets the version everywhere, tags it and starts the builds. When they finish, the release appears on the
+# Releases page and every installed Gaanly (Windows, macOS, Linux, Android, iPhone through AltStore/SideStore)
+# offers it as an update; Docker users get it with `docker compose pull` (or automatically with Watchtower).
+name: Publish a new version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "New version, like 1.0.1"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Bump, tag and start the builds
+        env:
+          VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Use a version like 1.0.1"; exit 1; }
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "::error::v$VERSION already exists. Pick a higher version."; exit 1
+          fi
+          node scripts/set-version.mjs "$VERSION"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Release v$VERSION"
+          git tag "v$VERSION"
+          git push origin HEAD:${{ github.ref_name }} "v$VERSION"
+          # Pushes made with the workflow's own token don't start other workflows, but this does.
+          gh workflow run release.yml --ref "v$VERSION"
+          gh workflow run docker.yml --ref "v$VERSION"

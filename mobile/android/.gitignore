@@ -99,3 +99,6 @@ app/src/main/assets/public
 app/src/main/assets/capacitor.config.json
 app/src/main/assets/capacitor.plugins.json
 app/src/main/res/xml/config.xml
+
+# The shared update key is committed on purpose (see app/build.gradle): every build must use the same key.
+!gaanly-update-key.jks
