@@ -172,6 +172,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          package-manager-cache: false
       - name: AltStore source for iPhone updates
         run: node scripts/altstore-source.mjs "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" downloads downloads/altstore.json
       - uses: softprops/action-gh-release@v3
