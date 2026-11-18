@@ -1,0 +1,22 @@
+# Gaanly on any machine with Docker: docker compose up -d, then open http://<this machine>:4180
+services:
+  gaanly:
+    image: ghcr.io/nurulislamtask/gaanly:latest
+    # Or build it from this folder instead:
+    # build: .
+    container_name: gaanly
+    ports:
+      - "4180:4180"
+    volumes:
+      - gaanly-data:/data # library: playlists, favorites, history
+      - gaanly-cache:/cache # HD videos already downloaded
+    environment:
+      # Optional, see the README: cookies for YouTube's bot checks, region for search results.
+      # YTDLP_EXTRA_ARGS: "--cookies /data/cookies.txt"
+      # GAANLY_LOCATION: "US"
+      GAANLY_CACHE_MAX_MB: "2048"
+    restart: unless-stopped
+
+volumes:
+  gaanly-data:
+  gaanly-cache:

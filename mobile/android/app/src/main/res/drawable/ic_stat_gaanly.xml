@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gaanly's headphones mark in one color: Android tints it (status bar, themed launcher icon). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    <group android:scaleX="1.35" android:scaleY="1.35" android:pivotX="256" android:pivotY="256" android:translateY="-27">
+        <path android:strokeColor="#FFFFFFFF" android:strokeWidth="34" android:strokeLineCap="round" android:pathData="M134,330 L134,268 A122,122 0 0 1 378,268 L378,330" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M132,296 H138 A40,40 0 0 1 178,336 V394 A40,40 0 0 1 138,434 H132 A40,40 0 0 1 92,394 V336 A40,40 0 0 1 132,296 Z M374,296 H380 A40,40 0 0 1 420,336 V394 A40,40 0 0 1 380,434 H374 A40,40 0 0 1 334,394 V336 A40,40 0 0 1 374,296 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M219,330 A13,13 0 0 1 232,343 V393 A13,13 0 0 1 206,393 V343 A13,13 0 0 1 219,330 Z M256,292 A13,13 0 0 1 269,305 V429 A13,13 0 0 1 243,429 V305 A13,13 0 0 1 256,292 Z M293,318 A13,13 0 0 1 306,331 V405 A13,13 0 0 1 280,405 V331 A13,13 0 0 1 293,318 Z" />
+    </group>
+</vector>
