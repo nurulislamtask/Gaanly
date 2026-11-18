@@ -43,7 +43,7 @@ jobs:
           if-no-files-found: error
 
   mac:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v5
