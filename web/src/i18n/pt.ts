@@ -67,6 +67,17 @@ export const pt: Messages = {
       "yt-new": "Novos álbuns e singles",
       "sp-india": "Spotify Top 50 · Índia",
     },
+    feed: {
+      chips: { all: "Tudo", bangla: "Bengali", hindi: "Hindi", english: "Inglês", punjabi: "Punjabi", kpop: "K-pop", romantic: "Romântico", chill: "Relax", workout: "Treino", party: "Festa" },
+      newSongs: (x: string) => `Novas músicas ${x}`,
+      oldSongs: (x: string) => `Clássicos ${x}`,
+      hits: (x: string) => `Sucessos ${x}`,
+      moreFrom: (x: string) => `Mais de ${x}`,
+      refresh: "Mostrar algo diferente",
+      featured: "Destaques",
+      yourLibrary: "Sua biblioteca",
+      playX: (x: string) => `Tocar ${x}`,
+    },
     spotifyNote: "As listas do Spotify vêm das paradas públicas; as músicas tocam do YouTube.",
   },
 

@@ -72,6 +72,17 @@ export const en = {
       "yt-new": "New albums & singles",
       "sp-india": "Spotify Top 50 · India",
     },
+    feed: {
+      chips: { all: "All", bangla: "Bangla", hindi: "Hindi", english: "English", punjabi: "Punjabi", kpop: "K-pop", romantic: "Romantic", chill: "Chill", workout: "Workout", party: "Party" },
+      newSongs: (x: string) => `New ${x} songs`,
+      oldSongs: (x: string) => `Old ${x} classics`,
+      hits: (x: string) => `${x} hits`,
+      moreFrom: (x: string) => `More from ${x}`,
+      refresh: "Show me something different",
+      featured: "Featured",
+      yourLibrary: "Your library",
+      playX: (x: string) => `Play ${x}`,
+    },
     spotifyNote: "Spotify lists come from its public charts; the songs play from YouTube.",
   },
 

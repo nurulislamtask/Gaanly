@@ -1,11 +1,10 @@
-import { ClockCounterClockwiseIcon, HeartIcon, MagnifyingGlassIcon, PlayIcon } from "@phosphor-icons/react";
+import { ClockCounterClockwiseIcon, HeartIcon, PlayIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { Artwork } from "../components/Artwork";
-import { DiscoverShelves } from "../components/DiscoverShelves";
-import { LogoMark } from "../components/Brand";
+import { Feed } from "../components/Feed";
 import { PageHeader, Section } from "../components/Page";
-import { TrackList, TrackListSkeleton } from "../components/TrackList";
+import { TrackList } from "../components/TrackList";
 import { useT } from "../i18n";
 import { paths } from "../lib/routes";
 import type { Track } from "../lib/types";
@@ -17,7 +16,7 @@ function Shortcut({ to, label, tracks, cover }: { to: string; label: string; tra
   const playList = usePlayer((s) => s.playList);
   const t = useT();
   return (
-    <div className="group relative flex h-14 items-center gap-3 overflow-hidden rounded-[12px] bg-surface-2 pr-2 transition-colors hover:bg-surface-3 md:h-16">
+    <div className="group relative flex h-14 w-48 shrink-0 items-center gap-3 overflow-hidden rounded-[14px] glass ring-1 ring-line pr-2 transition-colors hover:bg-surface-3 md:h-16">
       <Link to={to} className="absolute inset-0" aria-label={label} />
       <span className="pointer-events-none size-14 shrink-0 overflow-hidden md:size-16">{cover}</span>
       <span className="pointer-events-none min-w-0 flex-1 truncate text-[13px] font-semibold md:text-sm">{label}</span>
@@ -55,7 +54,6 @@ function RecentCard({ track, onPlay }: { track: Track; onPlay: () => void }) {
 export default function Home() {
   const { favorites, playlists, history, status } = useLibrary();
   const playList = usePlayer((s) => s.playList);
-  const navigate = useNavigate();
   const t = useT();
   const show = useAppearance();
   const empty = status === "ready" && !favorites.length && !playlists.length && !history.length;
@@ -68,30 +66,15 @@ export default function Home() {
         <h1 className="text-[28px] leading-tight font-semibold tracking-tight md:text-4xl">{t.time.greeting(new Date().getHours())}</h1>
       </div>
 
-      {status === "loading" && <TrackListSkeleton rows={6} />}
-
-      {empty && (
-        <div className="mx-4 flex flex-col items-start gap-5 rounded-[20px] bg-surface-2 p-6 ring-1 ring-line md:mx-6 md:flex-row md:items-center md:p-8">
-          <span className="grid size-16 shrink-0 place-items-center rounded-[18px] bg-accent text-accent-ink">
-            <LogoMark className="size-10" />
-          </span>
-          <div className="flex-1">
-            <p className="text-xl font-semibold tracking-tight">{t.home.startTitle}</p>
-            <p className="mt-1 max-w-[52ch] text-sm text-fg-2">{t.home.startBody}</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => navigate(paths.search)}
-            className="flex h-12 items-center gap-2 rounded-full bg-accent pr-6 pl-5 font-semibold text-accent-ink transition-transform active:scale-[0.97]"
-          >
-            <MagnifyingGlassIcon size={20} weight="bold" /> {t.common.searchMusic}
-          </button>
-        </div>
+      {!empty && status === "ready" && show.homeShortcuts && (
+        <p className="px-4 pb-2 text-xs font-medium tracking-wide text-fg-3 uppercase md:px-6">{t.home.feed.yourLibrary}</p>
       )}
+
+      {(empty || status === "loading") && <Feed />}
 
       {!empty && status === "ready" && (
         <div className="flex flex-col gap-10">
-          {show.homeShortcuts && <div className="grid grid-cols-2 gap-2 px-4 md:px-6 lg:grid-cols-3 2xl:grid-cols-4">
+          {show.homeShortcuts && <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 md:px-6">
             <Shortcut
               to={paths.favorites}
               label={t.nav.favorites}
@@ -122,6 +105,8 @@ export default function Home() {
               />
             ))}
           </div>}
+
+          <Feed />
 
           {show.homeRecent && history.length > 0 && (
             <Section
@@ -157,11 +142,6 @@ export default function Home() {
         </div>
       )}
 
-      {status !== "loading" && (
-        <div className="mt-10">
-          <DiscoverShelves />
-        </div>
-      )}
     </div>
   );
 }
