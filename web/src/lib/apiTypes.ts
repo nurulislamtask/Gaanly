@@ -65,10 +65,19 @@ export interface SystemMedia {
   onAction(handler: (action: "play" | "pause" | "next" | "previous" | "seek", position?: number) => void): void;
 }
 
+/** One Home shelf of music from YouTube Music or a Spotify chart (songs play from YouTube). */
+export interface DiscoverShelf {
+  id: string;
+  tracks: Track[];
+  albums: AlbumCard[];
+}
+
 export interface GaanlyApi {
   search(q: string, type: "song" | "video", signal?: AbortSignal): Promise<Track[]>;
   suggest(q: string, signal?: AbortSignal): Promise<string[]>;
   radio(id: string): Promise<Track[]>;
+  /** A Home shelf by id ("yt-trending", "sp-global", ...). */
+  discoverShelf(id: string, signal?: AbortSignal): Promise<DiscoverShelf>;
   genres(): Promise<Genre[]>;
   genre(id: string, signal?: AbortSignal): Promise<GenrePage>;
   genreArtists(id: string, offset: number): Promise<{ artists: GenreArtist[]; hasMore: boolean }>;

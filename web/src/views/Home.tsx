@@ -2,6 +2,7 @@ import { ClockCounterClockwiseIcon, HeartIcon, MagnifyingGlassIcon, PlayIcon } f
 import type { ReactNode } from "react";
 import { Link, useNavigate } from "react-router";
 import { Artwork } from "../components/Artwork";
+import { DiscoverShelves } from "../components/DiscoverShelves";
 import { LogoMark } from "../components/Brand";
 import { PageHeader, Section } from "../components/Page";
 import { TrackList, TrackListSkeleton } from "../components/TrackList";
@@ -153,6 +154,12 @@ export default function Home() {
               </div>
             </Section>
           )}
+        </div>
+      )}
+
+      {status !== "loading" && (
+        <div className="mt-10">
+          <DiscoverShelves />
         </div>
       )}
     </div>

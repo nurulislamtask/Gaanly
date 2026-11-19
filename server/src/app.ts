@@ -4,6 +4,7 @@ import fastifyStatic from "@fastify/static";
 import Fastify from "fastify";
 import { ALBUM_ID, album, ARTIST_ID, artist, GENRE_ID, genre, genreArtists, genres, searchAlbums } from "./browse.js";
 import { config } from "./config.js";
+import { discoverShelf, isShelfId, spotifyLink, spotifyTracks } from "./discover.js";
 import * as library from "./library.js";
 import { fileStorage } from "./libraryFile.js";
 import { findVideoFor, radio, search, suggestions } from "./search.js";
@@ -69,13 +70,24 @@ export async function startServer(opts: StartOptions = {}): Promise<RunningServe
 
   app.get("/api/search", async (req) => {
     const { q, type } = req.query as { q?: string; type?: string };
-    return { tracks: await search(query(q), type === "video" ? "video" : "song", langOf(req)) };
+    const text = query(q);
+    // A pasted Spotify link: its songs, found on YouTube.
+    const link = spotifyLink(text);
+    if (link) return { tracks: await spotifyTracks(link, langOf(req)) };
+    return { tracks: await search(text, type === "video" ? "video" : "song", langOf(req)) };
   });
 
   app.get("/api/suggest", async (req) => {
     const { q } = req.query as { q?: string };
     if (!q?.trim()) return { suggestions: [] };
     return { suggestions: await suggestions(q.trim().slice(0, 100), langOf(req)).catch(() => []) };
+  });
+
+  /** One Home shelf: YouTube Music's trending lists or a Spotify chart (see discover.ts). */
+  app.get("/api/discover/:sid", async (req) => {
+    const { sid } = req.params as { sid: string };
+    if (!isShelfId(sid)) throw new HttpError(404, msg("invalidGenre"));
+    return discoverShelf(sid, langOf(req));
   });
 
   app.get("/api/radio/:id", async (req) => ({ tracks: await radio(videoId(req.params)) }));

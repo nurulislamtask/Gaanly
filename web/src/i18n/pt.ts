@@ -60,6 +60,14 @@ export const pt: Messages = {
     startBody: "Procure qualquer música ou clipe do YouTube. Toca como áudio ou vídeo, sem anúncios.",
     seeAll: "Ver tudo",
     yourFavorites: "Suas favoritas",
+    shelves: {
+      "yt-trending": "Em alta no YouTube Music",
+      "sp-global": "Spotify Top 50 · Global",
+      "sp-hits": "Spotify · Top Hits de hoje",
+      "yt-new": "Novos álbuns e singles",
+      "sp-india": "Spotify Top 50 · Índia",
+    },
+    spotifyNote: "As listas do Spotify vêm das paradas públicas; as músicas tocam do YouTube.",
   },
 
   library: {

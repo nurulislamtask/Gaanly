@@ -2,6 +2,7 @@ import { getLang, getT } from "../i18n";
 import {
   ApiError,
   type Channel,
+  type DiscoverShelf,
   type ErrorCode,
   type ImportResult,
   type GaanlyApi,
@@ -40,6 +41,7 @@ export const api: GaanlyApi = {
     request<{ tracks: Track[] }>(`/api/search?q=${encodeURIComponent(q)}&type=${type}`, { signal }).then((r) => r.tracks),
   suggest: (q: string, signal?: AbortSignal) =>
     request<{ suggestions: string[] }>(`/api/suggest?q=${encodeURIComponent(q)}`, { signal }).then((r) => r.suggestions),
+  discoverShelf: (id: string, signal?: AbortSignal) => request<DiscoverShelf>(`/api/discover/${encodeURIComponent(id)}`, { signal }),
   radio: (id: string) => request<{ tracks: Track[] }>(`/api/radio/${id}`).then((r) => r.tracks),
   genres: () => request<{ genres: Genre[] }>("/api/genres").then((r) => r.genres),
   genre: (id: string, signal?: AbortSignal) => request<GenrePage>(`/api/genres/${encodeURIComponent(id)}`, { signal }),

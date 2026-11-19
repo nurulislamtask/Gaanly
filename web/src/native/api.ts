@@ -11,6 +11,7 @@ import {
   genres,
   searchAlbums,
 } from "../../../server/src/browse";
+import { discoverShelf, isShelfId, spotifyLink, spotifyTracks } from "../../../server/src/discover";
 import { msg, tr, type MsgKey } from "../../../server/src/i18n";
 import * as library from "../../../server/src/library";
 import { findVideoFor, radio, search, suggestions } from "../../../server/src/search";
@@ -59,9 +60,17 @@ export const api: GaanlyApi = {
   search: (q, type, signal) =>
     call(async () => {
       if (!q.trim()) throw fail(400, "emptyQuery");
-      return search(q.trim().slice(0, 200), type, getLang());
+      const text = q.trim().slice(0, 200);
+      const link = spotifyLink(text);
+      if (link) return spotifyTracks(link, getLang());
+      return search(text, type, getLang());
     }, signal),
   suggest: (q, signal) => call(() => suggestions(q.trim().slice(0, 100), getLang()).catch(() => []), signal),
+  discoverShelf: (id, signal) =>
+    call(async () => {
+      if (!isShelfId(id)) throw fail(400, "invalidGenre");
+      return discoverShelf(id, getLang());
+    }, signal),
   radio: (id) => call(() => radio(id)),
   genres: () => call(() => genres(getLang())),
   genre: (id, signal) =>

@@ -289,7 +289,7 @@ export async function genreArtists(id: string, offset: number, lang: Lang): Prom
 }
 
 /** An artist's most played songs (the "Top songs" shelf, expanded to its full list). */
-function albumCard(item: any): AlbumCard | null {
+export function albumCard(item: any): AlbumCard | null {
   const id = typeof item?.id === "string" ? item.id : "";
   if (!ALBUM_ID.test(id)) return null;
   const subtitle = text(item.subtitle);

@@ -65,6 +65,14 @@ export const en = {
     startBody: "Find any song or music video on YouTube. It plays as audio or video, with no ads.",
     seeAll: "See all",
     yourFavorites: "Your favorites",
+    shelves: {
+      "yt-trending": "Trending on YouTube Music",
+      "sp-global": "Spotify Top 50 · Global",
+      "sp-hits": "Spotify · Today's Top Hits",
+      "yt-new": "New albums & singles",
+      "sp-india": "Spotify Top 50 · India",
+    },
+    spotifyNote: "Spotify lists come from its public charts; the songs play from YouTube.",
   },
 
   library: {
