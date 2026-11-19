@@ -16,7 +16,7 @@ Runs as a **Windows**, **macOS** and **Linux** app, as an **Android**, **Android
 ![Docker](https://img.shields.io/badge/docker-amd64%20%7C%20arm64-2dd4bf?style=flat-square&labelColor=121318)
 ![TypeScript](https://img.shields.io/badge/TypeScript-100%25-2dd4bf?style=flat-square&labelColor=121318)
 
-<img src="docs/screenshots/home.jpg" alt="Gaanly playing Radiohead, with playlists, recently played and the Now Playing panel" width="900" />
+<img src="docs/screenshots/home.jpg" alt="Gaanly home: playlists, recently played and the Now Playing panel" width="900" />
 
 **[Download for Windows, macOS, Linux, Android and iPhone](https://github.com/nurulislamtask/Gaanly/releases/latest)** · [Run with Docker](#option-6-docker) · [Run from source](#option-7-node-server--browser)
 
@@ -104,18 +104,19 @@ Gaanly started from the idea behind the old Discord music bots: a server that fe
 
 ## Screenshots
 
+<sub>Made with invented artists and albums, so no real artwork is shown.</sub>
+
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/album.jpg" width="440" alt="Nevermind album page with its tracks in order" /><br /><sub>Albums, in their original order</sub></td>
-    <td align="center"><img src="docs/screenshots/genre.jpg" width="440" alt="Indie and alternative genre with its artists" /><br /><sub>Browse by genre</sub></td>
+    <td align="center"><img src="docs/screenshots/album.jpg" width="440" alt="An album page with its tracks in order" /><br /><sub>Albums, in their original order</sub></td>
+    <td align="center"><img src="docs/screenshots/genre.jpg" width="440" alt="A genre page with its artists" /><br /><sub>Browse by genre</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/cinema.jpg" width="440" alt="Cinema mode playing a music video" /><br /><sub>Cinema mode</sub></td>
-    <td align="center"><img src="docs/screenshots/search-a-list.jpg" width="440" alt="Search a list: six songs found at once" /><br /><sub>Search a list</sub></td>
+    <td align="center"><img src="docs/screenshots/search.jpg" width="440" alt="Search results with suggestions" /><br /><sub>Search</sub></td>
+    <td align="center"><img src="docs/screenshots/customize.jpg" width="440" alt="Settings: accent color, glass and layout" /><br /><sub>Your colors and layout</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/customize.jpg" width="440" alt="Violet accent color with a compact sidebar" /><br /><sub>Your colors and layout</sub></td>
-    <td align="center"><img src="docs/screenshots/mobile.jpg" width="440" alt="Gaanly on three phone screens" /><br /><sub>On your phone</sub></td>
+    <td align="center" colspan="2"><img src="docs/screenshots/mobile.jpg" width="900" alt="Gaanly on three phone screens" /><br /><sub>On your phone</sub></td>
   </tr>
 </table>
 
