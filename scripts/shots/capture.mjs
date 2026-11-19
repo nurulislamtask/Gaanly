@@ -121,8 +121,10 @@ const phone = [];
   const { ctx, page } = await newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await shot("phone-home", async () => {
     await page.goto(base + "/");
-    await page.getByText("Late night drive").first().waitFor();
-    await page.getByRole("button", { name: allTracks[8].title }).first().click();
+    const card = page.getByRole("button", { name: allTracks[8].title }).first();
+    await card.waitFor();
+    await settle(page, 800);
+    await card.click();
     await page.waitForTimeout(3500);
     const f = join(out, "_p1.png");
     await page.screenshot({ path: f });

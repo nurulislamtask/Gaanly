@@ -29,6 +29,7 @@ jobs:
         working-directory: scripts/shots
         run: node capture.mjs ../../docs/screenshots
       - name: Commit
+        if: success() || failure()
         run: |
           rm -f docs/screenshots/_p*.png
           git config user.name "github-actions[bot]"
