@@ -1,6 +1,8 @@
-import { GaugeIcon, MoonStarsIcon } from "@phosphor-icons/react";
+import { CheckIcon, DownloadSimpleIcon, GaugeIcon, MoonStarsIcon, SlidersIcon, WaveformIcon } from "@phosphor-icons/react";
 import { useT } from "../i18n";
 import { cn } from "../lib/format";
+import { offlineSupported, useOffline } from "../lib/offline";
+import { selectCurrent, usePlayer } from "../player/player";
 import { SLEEP_OPTIONS, useListening } from "../stores/listening";
 import { useUi } from "../stores/ui";
 
@@ -18,6 +20,15 @@ export function ListenTools({ className }: { className?: string }) {
   const sleep = useListening((s) => s.sleep);
   const setSleep = useListening((s) => s.setSleep);
   const toast = useUi((s) => s.toast);
+  const effect = useListening((s) => s.effect);
+  const cycleEffect = useListening((s) => s.cycleEffect);
+  const fade = useListening((s) => s.fade);
+  const cycleFade = useListening((s) => s.cycleFade);
+  const track = usePlayer(selectCurrent);
+  const saved = useOffline((s) => (track ? s.tracks.some((x) => x.id === track.id) : false));
+  const busy = useOffline((s) => (track ? s.busy.includes(track.id) : false));
+  const download = useOffline((s) => s.download);
+  const remove = useOffline((s) => s.remove);
 
   const label = (v: (typeof SLEEP_OPTIONS)[number]) => (v === "end" ? t.listen.sleepEnd : t.listen.sleepMinutes(v));
   const nextSleep = () => {
@@ -28,13 +39,43 @@ export function ListenTools({ className }: { className?: string }) {
   };
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex flex-wrap items-center gap-2", className)}>
       <button type="button" onClick={cycleSpeed} aria-label={t.listen.speedX(String(speed))} title={t.listen.speed} className={pill(speed !== 1)}>
         <GaugeIcon size={16} /> {speed}x
       </button>
       <button type="button" onClick={nextSleep} aria-label={sleep === null ? t.listen.sleepOff : t.listen.sleepSet(label(sleep))} title={t.listen.sleep} className={pill(sleep !== null)}>
         <MoonStarsIcon size={16} /> {sleep === null ? t.listen.sleep : label(sleep)}
       </button>
+      <button
+        type="button"
+        onClick={() => {
+          if (!cycleEffect()) toast(t.listen.effectUnsupported, "error");
+        }}
+        title={t.listen.effects}
+        className={pill(effect !== "off")}
+      >
+        <SlidersIcon size={16} /> {t.listen.effectNames[effect]}
+      </button>
+      <button type="button" onClick={cycleFade} title={t.listen.fade} className={pill(fade > 0)}>
+        <WaveformIcon size={16} /> {fade ? t.listen.fadeSeconds(fade) : t.listen.fadeOff}
+      </button>
+      {track && offlineSupported && (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            if (saved) return void remove(track.id);
+            download(track).then(
+              () => toast(t.listen.downloadDone(track.title)),
+              () => toast(t.listen.downloadFailed, "error"),
+            );
+          }}
+          className={pill(saved)}
+        >
+          {saved ? <CheckIcon size={16} weight="bold" /> : <DownloadSimpleIcon size={16} />}{" "}
+          {busy ? t.listen.downloading : saved ? t.listen.downloaded : t.listen.download}
+        </button>
+      )}
     </div>
   );
 }

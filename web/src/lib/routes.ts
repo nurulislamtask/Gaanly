@@ -9,6 +9,7 @@ export const paths = {
   library: "/library",
   favorites: "/favorites",
   history: "/history",
+  downloads: "/downloads",
   playlist: (id: string) => `/playlist/${id}`,
 };
 

@@ -1,5 +1,6 @@
 import {
   ArrowSquareOutIcon,
+  DownloadSimpleIcon,
   HeartIcon,
   ListPlusIcon,
   PlayIcon,
@@ -14,6 +15,7 @@ import { createPortal } from "react-dom";
 import { MD, useMediaQuery } from "../hooks/useMediaQuery";
 import { useT } from "../i18n";
 import { cn } from "../lib/format";
+import { offlineSupported, useOffline } from "../lib/offline";
 import { usePlayer } from "../player/player";
 import { useLibrary } from "../stores/library";
 import { useUi } from "../stores/ui";
@@ -103,6 +105,21 @@ export function TrackMenu() {
           onClick={run(() => void useLibrary.getState().removeFromPlaylist(menu.playlistId!, menu.track.id))}
         >
           {t.trackMenu.removeFromPlaylist}
+        </Item>
+      )}
+      {offlineSupported && (
+        <Item
+          icon={<DownloadSimpleIcon size={18} />}
+          onClick={run(() => {
+            const off = useOffline.getState();
+            if (off.has(menu.track.id)) return void off.remove(menu.track.id);
+            off.download(menu.track).then(
+              () => useUi.getState().toast(t.listen.downloadDone(menu.track.title)),
+              () => useUi.getState().toast(t.listen.downloadFailed, "error"),
+            );
+          })}
+        >
+          {useOffline.getState().has(menu.track.id) ? t.listen.removeDownload : t.listen.download}
         </Item>
       )}
       <div className="mx-3 my-1 h-px bg-line" />

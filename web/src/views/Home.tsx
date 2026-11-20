@@ -1,4 +1,4 @@
-import { ClockCounterClockwiseIcon, HeartIcon, PlayIcon } from "@phosphor-icons/react";
+import { ClockCounterClockwiseIcon, DownloadSimpleIcon, HeartIcon, PlayIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { Artwork } from "../components/Artwork";
@@ -9,6 +9,7 @@ import { useT } from "../i18n";
 import { paths } from "../lib/routes";
 import type { Track } from "../lib/types";
 import { usePlayer } from "../player/player";
+import { useOffline } from "../lib/offline";
 import { useHomePrefs } from "../stores/homePrefs";
 import { useAppearance } from "../stores/appearance";
 import { useLibrary } from "../stores/library";
@@ -57,6 +58,7 @@ export default function Home() {
   const playList = usePlayer((s) => s.playList);
   const t = useT();
   const show = useAppearance();
+  const offline = useOffline((s) => s.tracks);
   const playlistIds = useHomePrefs((s) => s.playlistIds);
   const setTuneOpen = useHomePrefs((s) => s.setTuneOpen);
   const shortcutPlaylists = playlistIds ? playlists.filter((p) => playlistIds.includes(p.id)) : playlists.slice(0, 6);
@@ -104,6 +106,18 @@ export default function Home() {
                 </span>
               }
             />
+            {offline.length > 0 && (
+              <Shortcut
+                to={paths.downloads}
+                label={t.listen.downloadsTitle}
+                tracks={offline}
+                cover={
+                  <span className="grid size-full place-items-center bg-surface-3 text-fg-2">
+                    <DownloadSimpleIcon size={24} />
+                  </span>
+                }
+              />
+            )}
             {shortcutPlaylists.map((p) => (
               <Shortcut
                 key={p.id}

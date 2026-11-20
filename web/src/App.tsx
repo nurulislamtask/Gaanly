@@ -29,6 +29,7 @@ import Artist from "./views/Artist";
 import BatchSearch from "./views/BatchSearch";
 import Collection from "./views/Collection";
 import Genre from "./views/Genre";
+import Downloads from "./views/Downloads";
 import Home from "./views/Home";
 import Library from "./views/Library";
 import Search from "./views/Search";
@@ -136,6 +137,7 @@ export default function App() {
               <Route path="/search/album/:id" element={<Album />} />
               <Route path={paths.library} element={<Library />} />
               <Route path={paths.favorites} element={<Collection kind="favorites" />} />
+              <Route path={paths.downloads} element={<Downloads />} />
               <Route path={paths.history} element={<Collection kind="history" />} />
               <Route path="/playlist/:id" element={<Collection kind="playlist" />} />
               <Route path="*" element={<Home />} />

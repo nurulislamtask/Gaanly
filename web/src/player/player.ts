@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { getT, useT } from "../i18n";
 import { api, capabilities, explainStreamError, streamSource, systemMedia, type ApiError, type ErrorCode } from "../lib/api";
+import { offlineUrl, useOffline } from "../lib/offline";
 import { createAudio } from "../lib/audio";
 import { shuffled } from "../lib/format";
 import type { Track } from "../lib/types";
@@ -206,7 +207,12 @@ export const usePlayer = create<PlayerState>((set, get) => {
       if (autoplay) play(media);
     };
     // The server's proxy URL is known right away; on Android the stream is first resolved on the phone.
-    const source = streamSource(mediaIdFor(track, kind), kind, s.quality);
+    const online = () => streamSource(mediaIdFor(track, kind), kind, s.quality);
+    // A downloaded song plays from the device, no internet needed.
+    const source =
+      kind === "audio" && useOffline.getState().has(track.id)
+        ? offlineUrl(track.id).then((url) => url ?? online())
+        : online();
     if (typeof source === "string") start(source);
     else {
       const mine = token;
@@ -678,15 +684,25 @@ export function useStatusText(): string | null {
   return typeof note === "string" ? t.player.status[note] : note.error;
 }
 
-/** Playback speed for songs and clips, keeping the voice's pitch. A new track starts at the same speed. */
-export function applyPlaybackSpeed(rate: number) {
+/** Playback speed for songs and clips. Keeping the pitch is normal; letting it follow the speed gives the "slowed" and "nightcore" sound. */
+export function applyPlaybackSpeed(rate: number, preservePitch = true) {
   for (const el of [audio, videoEl] as (HTMLMediaElement & { preservesPitch?: boolean })[]) {
     try {
       el.defaultPlaybackRate = rate;
       el.playbackRate = rate;
-      el.preservesPitch = true;
+      el.preservesPitch = preservePitch;
     } catch {
       /* the native iOS player may not support it */
     }
   }
+}
+
+/** The element songs play through (a native player on iPhone). */
+export const audioElement = (): unknown => audio;
+
+/** Scales the volume (0-1) for the fade at the start and end of a song. */
+export function setFadeLevel(level: number) {
+  const s = usePlayer.getState();
+  if (s.muted) return;
+  audio.volume = videoEl.volume = s.volume * level;
 }
