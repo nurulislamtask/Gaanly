@@ -1,4 +1,4 @@
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, CapacitorHttp } from "@capacitor/core";
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import { create } from "zustand";
 import { streamSource } from "./api";
@@ -45,6 +45,41 @@ async function idbDo<T>(mode: IDBTransactionMode, run: (store: IDBObjectStore) =
 
 const filePath = (id: string) => `gaanly-offline/${id}.m4a`;
 
+/**
+ * Android: YouTube's audio servers answer plain downloads with errors, so the file is fetched the way a player does,
+ * in ranges of 2 MB through Android's own HTTP stack, and written piece by piece.
+ */
+async function downloadOnAndroid(url: string, path: string) {
+  const CHUNK = 2 * 1024 * 1024;
+  const total = Number(new URL(url).searchParams.get("clen")) || 0;
+  let pos = 0;
+  try {
+    for (;;) {
+      const end = (total ? Math.min(pos + CHUNK, total) : pos + CHUNK) - 1;
+      const part = new URL(url);
+      part.searchParams.set("range", `${pos}-${end}`);
+      const res = await CapacitorHttp.request({
+        url: part.toString(),
+        method: "GET",
+        headers: { "user-agent": navigator.userAgent, range: `bytes=${pos}-${end}` },
+        responseType: "blob",
+      });
+      if (res.status >= 400) throw new Error(`HTTP ${res.status}`);
+      const data = typeof res.data === "string" ? res.data : "";
+      if (!data) break;
+      if (pos === 0) await Filesystem.writeFile({ path, directory: Directory.Data, data, recursive: true });
+      else await Filesystem.appendFile({ path, directory: Directory.Data, data });
+      const bytes = Math.floor((data.length * 3) / 4) - (data.endsWith("==") ? 2 : data.endsWith("=") ? 1 : 0);
+      pos += bytes;
+      if (total ? pos >= total : bytes < CHUNK) break;
+    }
+    if (pos === 0) throw new Error("empty response");
+  } catch (e) {
+    await Filesystem.deleteFile({ path, directory: Directory.Data }).catch(() => {});
+    throw e;
+  }
+}
+
 interface OfflineState {
   tracks: Track[];
   /** Song ids being downloaded right now. */
@@ -73,7 +108,7 @@ export const useOffline = create<OfflineState>((set, get) => {
       try {
         const url = await streamSource(track.id, "audio", "sd");
         if (native) {
-          await Filesystem.downloadFile({ url, path: filePath(track.id), directory: Directory.Data, recursive: true });
+          await downloadOnAndroid(url, filePath(track.id));
         } else {
           const res = await fetch(url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);

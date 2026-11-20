@@ -115,7 +115,7 @@ export function TrackMenu() {
             if (off.has(menu.track.id)) return void off.remove(menu.track.id);
             off.download(menu.track).then(
               () => useUi.getState().toast(t.listen.downloadDone(menu.track.title)),
-              () => useUi.getState().toast(t.listen.downloadFailed, "error"),
+              (e: Error) => useUi.getState().toast(`${t.listen.downloadFailed} (${e?.message ?? ""})`.slice(0, 160), "error"),
             );
           })}
         >

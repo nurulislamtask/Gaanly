@@ -115,8 +115,12 @@ export const useListening = create<ListeningState>((set, get) => {
       return true;
     },
     cycleEffect: () => {
-      const i = EFFECTS.indexOf(get().effect);
-      return get().setEffect(EFFECTS[(i + 1) % EFFECTS.length]!);
+      // Step to the next effect this device can apply; unsupported ones are skipped, so "off" is always reachable.
+      const start = EFFECTS.indexOf(get().effect);
+      for (let step = 1; step <= EFFECTS.length; step++) {
+        if (get().setEffect(EFFECTS[(start + step) % EFFECTS.length]!)) return true;
+      }
+      return false;
     },
     cycleFade: () => {
       const next = FADES[(FADES.indexOf(get().fade as (typeof FADES)[number]) + 1) % FADES.length]!;

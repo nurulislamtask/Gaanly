@@ -67,7 +67,7 @@ export function ListenTools({ className }: { className?: string }) {
             if (saved) return void remove(track.id);
             download(track).then(
               () => toast(t.listen.downloadDone(track.title)),
-              () => toast(t.listen.downloadFailed, "error"),
+              (e: Error) => toast(`${t.listen.downloadFailed} (${e?.message ?? ""})`.slice(0, 160), "error"),
             );
           }}
           className={pill(saved)}
@@ -100,7 +100,7 @@ export function DownloadButton({ className }: { className?: string }) {
         if (saved) return void remove(track.id);
         download(track).then(
           () => toast(t.listen.downloadDone(track.title)),
-          () => toast(t.listen.downloadFailed, "error"),
+          (e: Error) => toast(`${t.listen.downloadFailed} (${e?.message ?? ""})`.slice(0, 160), "error"),
         );
       }}
       className={cn("grid size-10 place-items-center rounded-full transition-colors active:scale-90", saved ? "text-accent-text" : "text-fg-2 hover:text-fg", busy && "animate-pulse", className)}
