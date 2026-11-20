@@ -47,7 +47,7 @@ export function LyricsView({ className }: { className?: string }) {
     parent.scrollTo({ top: el.offsetTop - parent.clientHeight / 2 + el.clientHeight / 2, behavior: "smooth" });
   }, [active]);
 
-  if (state === "loading" || (state !== "loading" && state.id !== id)) {
+  if (state === "loading" || state.id !== id) {
     return <p className="px-2 py-16 text-center text-sm text-fg-2">{t.listen.loadingLyrics}</p>;
   }
   if (!lyrics || (!synced.length && !lyrics.plain)) {
