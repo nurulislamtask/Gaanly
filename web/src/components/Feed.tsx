@@ -1,4 +1,4 @@
-import { ArrowsClockwiseIcon, FadersHorizontalIcon, PlayIcon, XIcon } from "@phosphor-icons/react";
+import { ArrowsClockwiseIcon, CaretDownIcon, PlayIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
 import { api } from "../lib/api";
@@ -8,39 +8,10 @@ import { cn } from "../lib/format";
 import type { Track } from "../lib/types";
 import { usePlayer } from "../player/player";
 import { isFiltering, useHomePrefs } from "../stores/homePrefs";
+import { TrackList, TrackListSkeleton } from "./TrackList";
 import { AlbumTile } from "./AlbumTiles";
 import { Artwork } from "./Artwork";
 import { Section } from "./Page";
-
-function TrackCard({ track, onPlay }: { track: Track; onPlay: () => void }) {
-  return (
-    <button type="button" onClick={onPlay} className="group flex w-36 shrink-0 snap-start flex-col gap-2 text-left md:w-44">
-      <span className="relative block">
-        <Artwork src={track.art} fallback={track.thumb} className="aspect-square w-full rounded-[16px] shadow-[0_10px_28px_rgb(0_0_0/0.28)]" />
-        <span className="absolute right-2 bottom-2 grid size-11 translate-y-1 place-items-center rounded-full bg-accent text-accent-ink opacity-0 shadow-[0_8px_20px_rgb(0_0_0/0.4)] transition-[opacity,transform] duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:opacity-100">
-          <PlayIcon size={20} weight="fill" />
-        </span>
-      </span>
-      <span className="min-w-0">
-        <span className="block truncate text-sm font-medium">{track.title}</span>
-        <span className="block truncate text-xs text-fg-2">{track.artist}</span>
-      </span>
-    </button>
-  );
-}
-
-function Skeleton() {
-  return (
-    <div className="no-scrollbar flex gap-4 overflow-x-hidden px-4 md:px-6">
-      {Array.from({ length: 6 }, (_, i) => (
-        <div key={i} className="w-36 shrink-0 md:w-44">
-          <div className="aspect-square w-full animate-pulse rounded-[16px] bg-surface-2" />
-          <div className="mt-2 h-3 w-24 animate-pulse rounded bg-surface-2" />
-        </div>
-      ))}
-    </div>
-  );
-}
 
 /** Drops what an earlier shelf already showed (same song, or the same cover under another title). */
 function fresh(data: DiscoverShelf, seen: Set<string>): DiscoverShelf {
@@ -79,7 +50,7 @@ function Shelf({
   /** What to show once loaded: the shelf's songs minus those shown above it. */
   view: DiscoverShelf | "failed" | null;
 }) {
-  const playList = usePlayer((s) => s.playList);
+  const t = useT();
   const host = useRef<HTMLDivElement>(null);
   const [near, setNear] = useState(false);
 
@@ -100,23 +71,43 @@ function Shelf({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [near]);
 
+  const [open, setOpen] = useState(false);
   if (view === "failed" || (view && view.tracks.length + view.albums.length < 3)) return null;
+  const LIST = 5;
   return (
     <div ref={host}>
       <Section title={title}>
         {!view ? (
-          <Skeleton />
-        ) : (
-          <div className="no-scrollbar flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-1 md:scroll-px-6 md:px-6">
-            {view.tracks.map((tr, i) => (
-              <TrackCard key={tr.id} track={tr} onPlay={() => playList(view.tracks, i)} />
-            ))}
-            {view.albums.map((a) => (
-              <div key={a.id} className="w-36 shrink-0 snap-start md:w-44">
-                <AlbumTile album={a} />
-              </div>
-            ))}
+          <div className="px-3">
+            <TrackListSkeleton rows={4} />
           </div>
+        ) : (
+          <>
+            {view.tracks.length > 0 && (
+              <div className="mx-3 rounded-[22px] glass p-1 ring-1 ring-line">
+                <TrackList tracks={open ? view.tracks : view.tracks.slice(0, LIST)} context={view.tracks} header={false} showAlbum={false} />
+                {view.tracks.length > LIST && (
+                  <button
+                    type="button"
+                    onClick={() => setOpen(!open)}
+                    className="flex h-11 w-full items-center justify-center gap-1.5 text-sm font-medium text-accent-text"
+                  >
+                    {open ? t.home.feed.showLess : t.home.feed.showMore(view.tracks.length - LIST)}
+                    <CaretDownIcon size={14} weight="bold" className={open ? "rotate-180" : ""} />
+                  </button>
+                )}
+              </div>
+            )}
+            {view.albums.length > 0 && (
+              <div className="no-scrollbar flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-1 md:scroll-px-6 md:px-6">
+                {view.albums.map((a) => (
+                  <div key={a.id} className="w-36 shrink-0 snap-start md:w-44">
+                    <AlbumTile album={a} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </Section>
     </div>
@@ -177,6 +168,27 @@ function titleOf(def: ShelfDef, t: ReturnType<typeof useT>): string {
   return type === "new" ? t.home.feed.newSongs(text) : type === "old" ? t.home.feed.oldSongs(text) : type === "hits" ? t.home.feed.hits(text) : type === "artist" ? t.home.feed.moreFrom(text) : text;
 }
 
+/** A song shelf: one search, or several merged (a singer's catalogue), keeping a singer's own songs only. */
+async function loadSongs(def: Extract<ShelfDef, { kind: "songs" }>, signal: AbortSignal): Promise<DiscoverShelf> {
+  const lists = await Promise.all([def.query, ...(def.more ?? [])].map((q) => api.search(q, "song", signal).catch(() => [] as Track[])));
+  let tracks = lists.flat();
+  if (def.match) {
+    const want = def.match.toLowerCase();
+    const own = tracks.filter((t) => t.artist.toLowerCase().includes(want));
+    if (own.length >= 3) tracks = own;
+  }
+  const seen = new Set<string>();
+  const unique = tracks.filter((t) => {
+    const key = `${t.title.toLowerCase().replace(/\(.*?\)|\[.*?\]/g, "").trim()}|${t.artist.toLowerCase()}`;
+    if (seen.has(t.id) || seen.has(key)) return false;
+    seen.add(t.id);
+    seen.add(key);
+    return true;
+  });
+  if (!unique.length && !signal.aborted && lists.every((l) => !l.length)) throw new Error("empty");
+  return { id: def.key, tracks: unique.slice(0, def.size), albums: [] };
+}
+
 const CHIP_KEY = "gaanly:feedChip";
 
 /** Home's music feed: category chips, the featured row, then shelves of new and old songs. Nothing to sign in to. */
@@ -222,8 +234,6 @@ export function Feed() {
     return { def, key, view };
   });
 
-  const summary = [...prefs.languages.map((l) => t.home.feed.chips[l as Chip] ?? l), ...prefs.artists].join(", ");
-
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center gap-2">
@@ -246,18 +256,6 @@ export function Feed() {
         </div>
         <button
           type="button"
-          onClick={() => prefs.setTuneOpen(true)}
-          aria-label={t.home.tune.button}
-          title={t.home.tune.button}
-          className={cn(
-            "grid size-9 shrink-0 place-items-center rounded-full ring-1 transition-colors",
-            filtering ? "bg-accent text-accent-ink ring-transparent" : "text-fg-2 ring-line hover:text-fg",
-          )}
-        >
-          <FadersHorizontalIcon size={18} />
-        </button>
-        <button
-          type="button"
           onClick={() => {
             setSeed(bumpSeed());
             setLoaded({});
@@ -270,15 +268,6 @@ export function Feed() {
         </button>
       </div>
 
-      {chip === "all" && filtering && (
-        <div className="mx-4 flex items-center gap-3 rounded-full bg-accent-soft py-1.5 pr-1.5 pl-4 text-sm text-accent-text md:mx-6">
-          <span className="min-w-0 flex-1 truncate">{t.home.tune.filtering(summary)}</span>
-          <button type="button" onClick={prefs.clearFilters} aria-label={t.home.tune.clear} className="grid size-8 shrink-0 place-items-center rounded-full hover:bg-accent/20">
-            <XIcon size={16} weight="bold" />
-          </button>
-        </div>
-      )}
-
       {showHero && <Hero onTracks={setHero} />}
 
       {rows.map(({ def, key, view }) => (
@@ -290,7 +279,7 @@ export function Feed() {
           load={
             def.kind === "discover"
               ? (signal) => api.discoverShelf(def.id, signal)
-              : (signal) => api.search(def.query, "song", signal).then((tracks) => ({ id: def.key, tracks: tracks.slice(0, 20), albums: [] }))
+              : (signal) => loadSongs(def, signal)
           }
         />
       ))}

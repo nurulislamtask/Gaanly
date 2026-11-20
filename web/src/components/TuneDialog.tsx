@@ -124,3 +124,26 @@ export function TuneDialog() {
     </Modal>
   );
 }
+
+/** Settings entry: what Home shows (languages, singers, playlists). */
+export function HomeSettings() {
+  const t = useT();
+  const prefs = useHomePrefs();
+  const summary = [...prefs.languages.map((l) => t.home.feed.chips[l as keyof typeof t.home.feed.chips] ?? l), ...prefs.artists].join(", ");
+  return (
+    <section className="flex flex-col gap-2">
+      <h3 className="text-xs font-medium text-fg-3">{t.home.tune.title}</h3>
+      <button
+        type="button"
+        onClick={() => prefs.setTuneOpen(true)}
+        className="flex items-center justify-between gap-3 rounded-[16px] bg-surface-1 px-4 py-3 text-left ring-1 ring-line transition-colors hover:bg-surface-2"
+      >
+        <span className="min-w-0">
+          <span className="block text-sm font-medium">{t.home.tune.button}</span>
+          <span className="block truncate text-xs text-fg-2">{summary ? t.home.tune.filtering(summary) : t.home.tune.languagesHint}</span>
+        </span>
+        <span className="shrink-0 text-sm font-medium text-accent-text">{t.home.tune.edit2}</span>
+      </button>
+    </section>
+  );
+}

@@ -79,3 +79,33 @@ export function ListenTools({ className }: { className?: string }) {
     </div>
   );
 }
+
+/** A one-tap download (or "downloaded") icon for the current song. */
+export function DownloadButton({ className }: { className?: string }) {
+  const t = useT();
+  const toast = useUi((s) => s.toast);
+  const track = usePlayer(selectCurrent);
+  const saved = useOffline((s) => (track ? s.tracks.some((x) => x.id === track.id) : false));
+  const busy = useOffline((s) => (track ? s.busy.includes(track.id) : false));
+  const download = useOffline((s) => s.download);
+  const remove = useOffline((s) => s.remove);
+  if (!track || !offlineSupported) return null;
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      aria-label={saved ? t.listen.removeDownload : t.listen.download}
+      title={saved ? t.listen.removeDownload : t.listen.download}
+      onClick={() => {
+        if (saved) return void remove(track.id);
+        download(track).then(
+          () => toast(t.listen.downloadDone(track.title)),
+          () => toast(t.listen.downloadFailed, "error"),
+        );
+      }}
+      className={cn("grid size-10 place-items-center rounded-full transition-colors active:scale-90", saved ? "text-accent-text" : "text-fg-2 hover:text-fg", busy && "animate-pulse", className)}
+    >
+      {saved ? <CheckIcon size={22} weight="bold" /> : <DownloadSimpleIcon size={22} />}
+    </button>
+  );
+}

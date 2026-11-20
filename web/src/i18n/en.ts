@@ -88,6 +88,7 @@ export const en = {
       done: "Done",
       filtering: (what: string) => `Showing only: ${what}`,
       removeX: (x: string) => `Remove ${x}`,
+      edit2: "Edit",
       edit: "Choose playlists",
     },
     feed: {
@@ -96,6 +97,8 @@ export const en = {
       oldSongs: (x: string) => `Old ${x} classics`,
       hits: (x: string) => `${x} hits`,
       moreFrom: (x: string) => `More from ${x}`,
+      showMore: (n: number) => `Show ${n} more`,
+      showLess: "Show less",
       refresh: "Show me something different",
       featured: "Featured",
       yourLibrary: "Your library",

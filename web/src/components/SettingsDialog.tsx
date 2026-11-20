@@ -16,6 +16,7 @@ import { useUi } from "../stores/ui";
 import { AboutSection } from "./AboutSection";
 import { BackupSection } from "./BackupSection";
 import { AccentPicker, LayoutSection, PalettePicker } from "./CustomizeSection";
+import { HomeSettings } from "./TuneDialog";
 import { Modal } from "./Modal";
 
 function Segmented<T extends string>({
@@ -153,6 +154,8 @@ export function SettingsDialog() {
             options={LANGUAGES.map(({ id, name }): [Lang, ReactNode] => [id, <span lang={id}>{name}</span>])}
           />
         </section>
+
+        <HomeSettings />
 
         <LayoutSection />
 

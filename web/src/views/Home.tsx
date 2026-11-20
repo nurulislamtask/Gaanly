@@ -18,7 +18,7 @@ function Shortcut({ to, label, tracks, cover }: { to: string; label: string; tra
   const playList = usePlayer((s) => s.playList);
   const t = useT();
   return (
-    <div className="group relative flex h-14 w-48 shrink-0 items-center gap-3 overflow-hidden rounded-[14px] glass ring-1 ring-line pr-2 transition-colors hover:bg-surface-3 md:h-16">
+    <div className="group relative flex h-14 min-w-0 items-center gap-3 overflow-hidden rounded-[14px] glass ring-1 ring-line pr-2 transition-colors hover:bg-surface-3 md:h-16">
       <Link to={to} className="absolute inset-0" aria-label={label} />
       <span className="pointer-events-none size-14 shrink-0 overflow-hidden md:size-16">{cover}</span>
       <span className="pointer-events-none min-w-0 flex-1 truncate text-[13px] font-semibold md:text-sm">{label}</span>
@@ -60,7 +60,6 @@ export default function Home() {
   const show = useAppearance();
   const offline = useOffline((s) => s.tracks);
   const playlistIds = useHomePrefs((s) => s.playlistIds);
-  const setTuneOpen = useHomePrefs((s) => s.setTuneOpen);
   const shortcutPlaylists = playlistIds ? playlists.filter((p) => playlistIds.includes(p.id)) : playlists.slice(0, 6);
   const empty = status === "ready" && !favorites.length && !playlists.length && !history.length;
 
@@ -69,15 +68,12 @@ export default function Home() {
       <PageHeader />
 
       <div className="px-4 pt-2 pb-6 md:px-6 md:pt-8">
-        <h1 className="text-[28px] leading-tight font-semibold tracking-tight md:text-4xl">{t.time.greeting(new Date().getHours())}</h1>
+        <h1 className="text-2xl leading-tight font-semibold tracking-tight md:text-4xl">{t.time.greeting(new Date().getHours())}</h1>
       </div>
 
       {!empty && status === "ready" && show.homeShortcuts && (
         <div className="flex items-center justify-between px-4 pb-2 md:px-6">
           <p className="text-xs font-medium tracking-wide text-fg-3 uppercase">{t.home.feed.yourLibrary}</p>
-          <button type="button" onClick={() => setTuneOpen(true)} className="text-xs font-medium text-accent-text hover:underline">
-            {t.home.tune.edit}
-          </button>
         </div>
       )}
 
@@ -85,7 +81,7 @@ export default function Home() {
 
       {!empty && status === "ready" && (
         <div className="flex flex-col gap-10">
-          {show.homeShortcuts && <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 md:px-6">
+          {show.homeShortcuts && <div className="grid grid-cols-2 gap-2 px-4 md:px-6 lg:grid-cols-3 2xl:grid-cols-4">
             <Shortcut
               to={paths.favorites}
               label={t.nav.favorites}

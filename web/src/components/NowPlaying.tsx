@@ -18,7 +18,7 @@ import { useUi, type PanelTab } from "../stores/ui";
 import { Artwork } from "./Artwork";
 import { FavoriteButton, ModeSwitch, Scrubber, Transport } from "./Controls";
 import { IconButton } from "./IconButton";
-import { ListenTools } from "./ListenTools";
+import { DownloadButton, ListenTools } from "./ListenTools";
 import { LyricsView } from "./LyricsView";
 import { QueueList } from "./Queue";
 import { SLOT, VideoSlot } from "./Video";
@@ -85,6 +85,7 @@ function TrackHeading({ track, large = false }: { track: Track; large?: boolean 
           {statusText ?? [track.artist, track.album].filter(Boolean).join(" · ")}
         </p>
       </div>
+      <DownloadButton />
       <FavoriteButton track={track} size={large ? "lg" : "md"} />
     </div>
   );
@@ -276,11 +277,12 @@ export function NowPlayingSheet({ open, onClose }: { open: boolean; onClose: () 
                 <CaretDownIcon size={24} />
               </IconButton>
               <div className="mx-auto mt-0 h-1 w-10 rounded-full bg-fg-3/50" />
+              <DownloadButton className="ml-auto" />
               <IconButton
                 label={view === "lyrics" ? t.nowPlaying.backToPlayer : t.listen.lyrics}
                 active={view === "lyrics"}
                 onClick={() => setView(view === "lyrics" ? "player" : "lyrics")}
-                className="mr-1 ml-auto"
+                className="mr-1"
               >
                 <MicrophoneStageIcon size={22} />
               </IconButton>

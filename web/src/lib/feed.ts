@@ -10,7 +10,17 @@ export type Chip = (typeof CHIPS)[number];
 
 export type ShelfDef =
   | { kind: "discover"; id: string }
-  | { kind: "songs"; key: string; query: string; title: { type: "new" | "old" | "hits" | "mood" | "artist"; text: string } };
+  | {
+      kind: "songs";
+      key: string;
+      query: string;
+      /** More searches to merge in (a singer's whole catalogue takes several). */
+      more?: string[];
+      /** Keep only songs whose artist contains this name. */
+      match?: string;
+      size: number;
+      title: { type: "new" | "old" | "hits" | "mood" | "artist"; text: string };
+    };
 
 const ARTISTS: Record<string, string[]> = {
   bangla: ["Anupam Roy", "Habib Wahid", "Tahsan", "James", "Minar Rahman", "Ayub Bachchu", "Warfaze", "Artcell", "Arijit Singh", "Shreya Ghoshal", "Kishore Kumar", "Nancy", "Imran Mahmudul", "Pritom Hasan", "Bhoomi", "Hemanta Mukherjee"],
@@ -94,7 +104,18 @@ export function feedFor(chip: Chip, seed: number, filter?: FeedFilter): ShelfDef
     kind: "songs",
     key,
     query,
+    size: 20,
     title: { type, text },
+  });
+  /** Everything we can find by one singer: several searches merged, only their own songs. */
+  const singer = (a: string): ShelfDef => ({
+    kind: "songs",
+    key: `f-a-${a}`,
+    query: `${a} songs`,
+    more: [`${a} best songs`, `${a} new songs`, `${a} old songs`, `${a} romantic songs`, `${a} sad songs`, `${a} hits`],
+    match: a,
+    size: 80,
+    title: { type: "artist", text: a },
   });
 
   if (chip === "all" && filter && (filter.languages.length || filter.artists.length)) {
@@ -108,7 +129,7 @@ export function feedFor(chip: Chip, seed: number, filter?: FeedFilter): ShelfDef
       shelves.push(songs(`f-old-${l}`, `${w} old classic songs`, "old", w));
     }
     for (const a of filter.artists) {
-      shelves.push(songs(`f-a-${a}`, `${a} best songs`, "artist", a), songs(`f-n-${a}`, `${a} new songs`, "new", a));
+      shelves.push(singer(a));
     }
     return shelves;
   }

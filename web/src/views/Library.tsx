@@ -8,6 +8,7 @@ import { useT } from "../i18n";
 import { paths } from "../lib/routes";
 import type { Track } from "../lib/types";
 import { IconButton } from "../components/IconButton";
+import { offlineSupported, useOffline } from "../lib/offline";
 import { useLibrary } from "../stores/library";
 import { useUi } from "../stores/ui";
 
@@ -38,6 +39,7 @@ export default function Library() {
   const [creating, setCreating] = useState(false);
   const setSettingsOpen = useUi((s) => s.setSettingsOpen);
   const navigate = useNavigate();
+  const downloads = useOffline((s) => s.tracks);
   const t = useT();
 
   return (
@@ -64,6 +66,9 @@ export default function Library() {
       <ul className="grid grid-cols-1 gap-1 px-2 pt-2 md:grid-cols-3 md:gap-2 md:px-4 lg:grid-cols-4 2xl:grid-cols-6">
         <Entry to={paths.favorites} name={t.nav.favorites} kind="favorites" tracks={favorites} sub={t.common.tracks(favorites.length)} />
         <Entry to={paths.history} name={t.nav.recentlyPlayed} kind="history" tracks={history} sub={t.common.tracks(history.length)} />
+        {offlineSupported && (
+          <Entry to={paths.downloads} name={t.listen.downloadsTitle} kind="playlist" tracks={downloads} sub={t.common.tracks(downloads.length)} />
+        )}
         {playlists.map((p) => (
           <Entry
             key={p.id}

@@ -82,6 +82,7 @@ export const bn: Messages = merge(en, {
       done: "হয়েছে",
       filtering: (what: string) => `শুধু দেখাচ্ছে: ${what}`,
       removeX: (x: string) => `${x} সরান`,
+      edit2: "বদলান",
       edit: "প্লেলিস্ট বাছুন",
     },
     feed: {
@@ -90,6 +91,8 @@ export const bn: Messages = merge(en, {
       oldSongs: (x: string) => `পুরনো ${x} ক্লাসিক`,
       hits: (x: string) => `${x} হিট গান`,
       moreFrom: (x: string) => `${x}-এর আরও গান`,
+      showMore: (n: number) => `আরও ${n}টি দেখুন`,
+      showLess: "কম দেখুন",
       refresh: "নতুন কিছু দেখান",
       featured: "বিশেষ",
       yourLibrary: "আপনার লাইব্রেরি",

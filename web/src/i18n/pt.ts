@@ -83,6 +83,7 @@ export const pt: Messages = {
       done: "Pronto",
       filtering: (what: string) => `Mostrando só: ${what}`,
       removeX: (x: string) => `Remover ${x}`,
+      edit2: "Editar",
       edit: "Escolher playlists",
     },
     feed: {
@@ -91,6 +92,8 @@ export const pt: Messages = {
       oldSongs: (x: string) => `Clássicos ${x}`,
       hits: (x: string) => `Sucessos ${x}`,
       moreFrom: (x: string) => `Mais de ${x}`,
+      showMore: (n: number) => `Mostrar mais ${n}`,
+      showLess: "Mostrar menos",
       refresh: "Mostrar algo diferente",
       featured: "Destaques",
       yourLibrary: "Sua biblioteca",
