@@ -677,3 +677,16 @@ export function useStatusText(): string | null {
   if (note === null) return null;
   return typeof note === "string" ? t.player.status[note] : note.error;
 }
+
+/** Playback speed for songs and clips, keeping the voice's pitch. A new track starts at the same speed. */
+export function applyPlaybackSpeed(rate: number) {
+  for (const el of [audio, videoEl] as (HTMLMediaElement & { preservesPitch?: boolean })[]) {
+    try {
+      el.defaultPlaybackRate = rate;
+      el.playbackRate = rate;
+      el.preservesPitch = true;
+    } catch {
+      /* the native iOS player may not support it */
+    }
+  }
+}

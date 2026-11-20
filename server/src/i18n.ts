@@ -3,7 +3,7 @@
  * They are kept as keys and translated when sent, so each device gets its own language.
  */
 
-export type Lang = "en" | "pt-BR";
+export type Lang = "en" | "pt-BR" | "bn";
 type Params = Record<string, string | number>;
 
 const en = {
@@ -106,7 +106,8 @@ const pt: Record<MsgKey, string> = {
   ffmpegPackage: "Pacote do FFmpeg inesperado.",
 };
 
-const CATALOG: Record<Lang, Record<MsgKey, string>> = { en, "pt-BR": pt };
+// Bangla: the app's own screens are translated in the web app; server messages stay English for now.
+const CATALOG: Record<Lang, Record<MsgKey, string>> = { en, "pt-BR": pt, bn: en };
 
 /** A message translated when it is sent: a key plus the values for its {placeholders}. */
 export interface Msg {
@@ -124,7 +125,7 @@ export function tr(lang: Lang, text: Text): string {
   return CATALOG[lang][text.key].replace(/\{(\w+)\}/g, (all, name: string) => String(text.params?.[name] ?? all));
 }
 
-export const isLang = (v: unknown): v is Lang => v === "en" || v === "pt-BR";
+export const isLang = (v: unknown): v is Lang => v === "en" || v === "pt-BR" || v === "bn";
 
 /** The language a request asked for. The app always says; anything else (media elements, curl) gets English. */
 export function langOf(req: { headers: Record<string, string | string[] | undefined> }): Lang {
@@ -133,4 +134,4 @@ export function langOf(req: { headers: Record<string, string | string[] | undefi
 }
 
 /** The code YouTube Music uses for its own words (genre names, artist bios). */
-export const youtubeLang = (lang: Lang) => (lang === "pt-BR" ? "pt" : "en");
+export const youtubeLang = (lang: Lang) => (lang === "pt-BR" ? "pt" : lang === "bn" ? "bn" : "en");

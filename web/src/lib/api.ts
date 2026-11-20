@@ -5,6 +5,7 @@ import {
   type DiscoverShelf,
   type ErrorCode,
   type ImportResult,
+  type Lyrics,
   type GaanlyApi,
   type Prepared,
   type SystemInfo,
@@ -42,6 +43,11 @@ export const api: GaanlyApi = {
   suggest: (q: string, signal?: AbortSignal) =>
     request<{ suggestions: string[] }>(`/api/suggest?q=${encodeURIComponent(q)}`, { signal }).then((r) => r.suggestions),
   discoverShelf: (id: string, signal?: AbortSignal) => request<DiscoverShelf>(`/api/discover/${encodeURIComponent(id)}`, { signal }),
+  lyrics: (t: Track, signal?: AbortSignal) =>
+    request<{ lyrics: Lyrics | null }>(
+      `/api/lyrics?title=${encodeURIComponent(t.title)}&artist=${encodeURIComponent(t.artist)}&duration=${Math.round(t.duration)}`,
+      { signal },
+    ).then((r) => r.lyrics),
   radio: (id: string) => request<{ tracks: Track[] }>(`/api/radio/${id}`).then((r) => r.tracks),
   genres: () => request<{ genres: Genre[] }>("/api/genres").then((r) => r.genres),
   genre: (id: string, signal?: AbortSignal) => request<GenrePage>(`/api/genres/${encodeURIComponent(id)}`, { signal }),

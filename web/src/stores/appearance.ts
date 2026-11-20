@@ -4,6 +4,8 @@ import { accentCss, DEFAULT_ACCENT, isHex } from "../lib/accent";
 /** How the app looks and what it shows, per device. The Now Playing panel lives in the UI store (it has a button too). */
 export interface Appearance {
   accent: string;
+  /** Surface colours: "ocean" is Gaanly's own. */
+  palette: Palette;
   sidebarPlaylists: boolean;
   compactSidebar: boolean;
   albumColumn: boolean;
@@ -14,8 +16,12 @@ export interface Appearance {
   homeFavorites: boolean;
 }
 
+export const PALETTES = ["ocean", "midnight", "graphite", "plum", "forest", "sunset"] as const;
+export type Palette = (typeof PALETTES)[number];
+
 export const DEFAULT_APPEARANCE: Appearance = {
   accent: DEFAULT_ACCENT,
+  palette: "ocean",
   sidebarPlaylists: true,
   compactSidebar: false,
   albumColumn: true,
@@ -47,8 +53,9 @@ export function cleanAppearance(input: unknown): Appearance {
   const v = (input && typeof input === "object" ? input : {}) as Record<string, unknown>;
   const out: Appearance = { ...DEFAULT_APPEARANCE };
   if (isHex(v.accent)) out.accent = v.accent.toLowerCase();
+  if ((PALETTES as readonly unknown[]).includes(v.palette)) out.palette = v.palette as Palette;
   for (const k of Object.keys(DEFAULT_APPEARANCE) as (keyof Appearance)[]) {
-    if (k !== "accent" && typeof v[k] === "boolean") (out[k] as boolean) = v[k];
+    if (k !== "accent" && k !== "palette" && typeof v[k] === "boolean") (out[k] as boolean) = v[k];
   }
   return out;
 }
@@ -73,6 +80,8 @@ function apply(a: Appearance) {
   } else {
     style?.remove();
   }
+  if (a.palette === "ocean") delete root.dataset.palette;
+  else root.dataset.palette = a.palette;
   if (a.compactSidebar) root.dataset.rail = "compact";
   else delete root.dataset.rail;
   if (a.texture) delete root.dataset.texture;

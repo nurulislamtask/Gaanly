@@ -5,6 +5,7 @@ import Fastify from "fastify";
 import { ALBUM_ID, album, ARTIST_ID, artist, GENRE_ID, genre, genreArtists, genres, searchAlbums } from "./browse.js";
 import { config } from "./config.js";
 import { discoverShelf, isShelfId, spotifyLink, spotifyTracks } from "./discover.js";
+import { lyricsFor } from "./lyrics.js";
 import * as library from "./library.js";
 import { fileStorage } from "./libraryFile.js";
 import { findVideoFor, radio, search, suggestions } from "./search.js";
@@ -88,6 +89,12 @@ export async function startServer(opts: StartOptions = {}): Promise<RunningServe
     const { sid } = req.params as { sid: string };
     if (!isShelfId(sid)) throw new HttpError(404, msg("invalidGenre"));
     return discoverShelf(sid, langOf(req));
+  });
+
+  app.get("/api/lyrics", async (req) => {
+    const { title, artist, duration } = req.query as { title?: string; artist?: string; duration?: string };
+    if (!title?.trim()) throw new HttpError(400, msg("missingTitle"));
+    return { lyrics: await lyricsFor(title.slice(0, 200), (artist ?? "").slice(0, 200), Number(duration) || 0) };
   });
 
   app.get("/api/radio/:id", async (req) => ({ tracks: await radio(videoId(req.params)) }));

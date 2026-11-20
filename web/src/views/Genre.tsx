@@ -110,15 +110,27 @@ function GenreBody({ id, lang }: { id: string; lang: Lang }) {
           <>
             <p className="px-4 pb-3 text-sm text-fg-2 md:px-6">{t.genre.pickArtist}</p>
             <ul className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 sm:grid-cols-3 md:px-6 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-              {artists.map((a) => (
+              {artists.map((a, i) => {
+                // The same album cover for several artists looks like a bug: later ones get a tile with their initials.
+                const repeated = artists.findIndex((o) => o.art === a.art) !== i;
+                return (
                 <li key={a.id}>
                   <Link to={paths.artist(a.id)} state={{ name: a.name }} className="group flex flex-col gap-2">
                     <span className="block overflow-hidden rounded-[14px]">
-                      <Artwork
-                        src={a.art}
-                        fallback={a.thumb}
-                        className="aspect-square w-full transition-transform duration-300 ease-out-expo group-hover:scale-[1.04]"
-                      />
+                      {repeated ? (
+                        <span
+                          className="grid aspect-square w-full place-items-center text-4xl font-semibold text-white transition-transform duration-300 ease-out-expo group-hover:scale-[1.04]"
+                          style={{ background: `linear-gradient(135deg, hsl(${[...a.name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7)} 60% 42%), hsl(${[...a.name].reduce((h, c) => (h * 17 + c.charCodeAt(0)) % 360, 3)} 65% 28%))` }}
+                        >
+                          {[...a.name.trim()].slice(0, 2).join("").toUpperCase()}
+                        </span>
+                      ) : (
+                        <Artwork
+                          src={a.art}
+                          fallback={a.thumb}
+                          className="aspect-square w-full transition-transform duration-300 ease-out-expo group-hover:scale-[1.04]"
+                        />
+                      )}
                     </span>
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-semibold">{a.name}</span>
@@ -126,7 +138,8 @@ function GenreBody({ id, lang }: { id: string; lang: Lang }) {
                     </span>
                   </Link>
                 </li>
-              ))}
+                );
+              })}
             </ul>
 
             <div className="flex flex-col items-center gap-2 px-4 pt-8 md:px-6">

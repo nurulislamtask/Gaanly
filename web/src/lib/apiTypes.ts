@@ -72,10 +72,18 @@ export interface DiscoverShelf {
   albums: AlbumCard[];
 }
 
+/** A song's lyrics: timed lines (seconds) when available, plus the plain text. */
+export interface Lyrics {
+  synced: { t: number; text: string }[];
+  plain: string;
+}
+
 export interface GaanlyApi {
   search(q: string, type: "song" | "video", signal?: AbortSignal): Promise<Track[]>;
   suggest(q: string, signal?: AbortSignal): Promise<string[]>;
   radio(id: string): Promise<Track[]>;
+  /** Lyrics from LRCLIB, or null when it has none. */
+  lyrics(track: Track, signal?: AbortSignal): Promise<Lyrics | null>;
   /** A Home shelf by id ("yt-trending", "sp-global", ...). */
   discoverShelf(id: string, signal?: AbortSignal): Promise<DiscoverShelf>;
   genres(): Promise<Genre[]>;

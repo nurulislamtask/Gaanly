@@ -4,7 +4,8 @@
  * seed (the day, plus a counter the refresh button bumps) so Home looks different every time you come back.
  */
 
-export const CHIPS = ["all", "bangla", "hindi", "english", "punjabi", "kpop", "romantic", "chill", "workout", "party"] as const;
+export const LANGUAGES = ["bangla", "hindi", "urdu", "english", "punjabi", "tamil", "telugu", "kpop"] as const;
+export const CHIPS = ["all", "bangla", "hindi", "urdu", "english", "punjabi", "tamil", "telugu", "kpop", "romantic", "chill", "workout", "party"] as const;
 export type Chip = (typeof CHIPS)[number];
 
 export type ShelfDef =
@@ -16,6 +17,9 @@ const ARTISTS: Record<string, string[]> = {
   hindi: ["Arijit Singh", "Atif Aslam", "Neha Kakkar", "Badshah", "Jubin Nautiyal", "Shreya Ghoshal", "Sonu Nigam", "Pritam", "A. R. Rahman", "Darshan Raval", "Kumar Sanu", "Lata Mangeshkar", "Kishore Kumar", "Mohit Chauhan", "Armaan Malik"],
   english: ["Taylor Swift", "The Weeknd", "Ed Sheeran", "Dua Lipa", "Coldplay", "Billie Eilish", "Imagine Dragons", "Drake", "Bruno Mars", "Post Malone", "Adele", "Eminem", "Justin Bieber", "Ariana Grande", "Harry Styles", "Queen", "Michael Jackson"],
   punjabi: ["Diljit Dosanjh", "AP Dhillon", "Sidhu Moose Wala", "Karan Aujla", "Guru Randhawa", "Jazzy B", "Amrinder Gill", "Sharry Mann"],
+  urdu: ["Atif Aslam", "Rahat Fateh Ali Khan", "Nusrat Fateh Ali Khan", "Ali Zafar", "Abida Parveen", "Asim Azhar", "Arooj Aftab", "Mehdi Hassan", "Ghulam Ali", "Junaid Jamshed", "Momina Mustehsan"],
+  tamil: ["Anirudh Ravichander", "A. R. Rahman", "Yuvan Shankar Raja", "Sid Sriram", "Ilaiyaraaja", "Harris Jayaraj", "Dhanush"],
+  telugu: ["Devi Sri Prasad", "S. S. Thaman", "Anirudh Ravichander", "Sid Sriram", "Armaan Malik", "M. M. Keeravani"],
   kpop: ["BTS", "BLACKPINK", "NewJeans", "Stray Kids", "TWICE", "IVE", "aespa", "SEVENTEEN", "Jungkook"],
 };
 
@@ -26,7 +30,7 @@ const MOODS: Record<string, string[]> = {
   party: ["party songs", "dance hits", "club hits", "wedding dance songs", "road trip songs"],
 };
 
-const LANG_WORD: Record<string, string> = { bangla: "Bangla", hindi: "Hindi", english: "English", punjabi: "Punjabi", kpop: "K-pop" };
+const LANG_WORD: Record<string, string> = { bangla: "Bangla", hindi: "Hindi", english: "English", punjabi: "Punjabi", kpop: "K-pop", urdu: "Urdu", tamil: "Tamil", telugu: "Telugu" };
 
 /** A small seeded random generator, so the same seed gives the same Home. */
 function rng(seed: number) {
@@ -76,7 +80,15 @@ export function bumpSeed(): number {
   return day * 100 + bump;
 }
 
-export function feedFor(chip: Chip, seed: number): ShelfDef[] {
+export interface FeedFilter {
+  languages: string[];
+  artists: string[];
+}
+
+/** Every singer the app suggests, for the "your singers" picker. */
+export const SUGGESTED_ARTISTS = [...new Set(Object.values(ARTISTS).flat())].sort((a, b) => a.localeCompare(b));
+
+export function feedFor(chip: Chip, seed: number, filter?: FeedFilter): ShelfDef[] {
   const rand = rng(seed * 31 + CHIPS.indexOf(chip));
   const songs = (key: string, query: string, type: "new" | "old" | "hits" | "mood" | "artist", text: string): ShelfDef => ({
     kind: "songs",
@@ -85,8 +97,24 @@ export function feedFor(chip: Chip, seed: number): ShelfDef[] {
     title: { type, text },
   });
 
+  if (chip === "all" && filter && (filter.languages.length || filter.artists.length)) {
+    // The person picked what they want: only that, nothing else.
+    const shelves: ShelfDef[] = [];
+    for (const l of filter.languages) {
+      const w = LANG_WORD[l];
+      if (!w) continue;
+      shelves.push(songs(`f-new-${l}`, `${w} new songs 2026`, "new", w), songs(`f-hits-${l}`, `${w} hit songs`, "hits", w));
+      for (const a of pick(ARTISTS[l] ?? [], 2, rand)) shelves.push(songs(`f-a-${a}`, `${a} best songs`, "artist", a));
+      shelves.push(songs(`f-old-${l}`, `${w} old classic songs`, "old", w));
+    }
+    for (const a of filter.artists) {
+      shelves.push(songs(`f-a-${a}`, `${a} best songs`, "artist", a), songs(`f-n-${a}`, `${a} new songs`, "new", a));
+    }
+    return shelves;
+  }
+
   if (chip === "all") {
-    const langs = pick(["bangla", "hindi", "english", "punjabi", "kpop"], 3, rand);
+    const langs = pick(["bangla", "hindi", "urdu", "english", "punjabi", "kpop"], 3, rand);
     const shelves: ShelfDef[] = [
       { kind: "discover", id: "yt-trending" },
       { kind: "discover", id: "sp-global" },
@@ -106,7 +134,7 @@ export function feedFor(chip: Chip, seed: number): ShelfDef[] {
     return pick(MOODS[chip]!, 6, rand).map((q) => songs(`m-${q}`, q, "mood", q[0]!.toUpperCase() + q.slice(1)));
   }
 
-  const word = LANG_WORD[chip]!;
+  const word = LANG_WORD[chip] ?? chip;
   const shelves: ShelfDef[] = [
     songs("new", `${word} new songs 2026`, "new", word),
     songs("hits", `${word} hit songs`, "hits", word),

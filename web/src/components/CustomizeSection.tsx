@@ -2,7 +2,7 @@ import { CheckIcon, PaletteIcon } from "@phosphor-icons/react";
 import { useT } from "../i18n";
 import { inkFor } from "../lib/accent";
 import { cn } from "../lib/format";
-import { ACCENTS, useAppearance } from "../stores/appearance";
+import { ACCENTS, PALETTES, useAppearance } from "../stores/appearance";
 import { useUi } from "../stores/ui";
 
 /** Ready-made accent swatches plus any colour from the system picker. */
@@ -145,5 +145,52 @@ export function LayoutSection() {
         {t.customize.reset}
       </button>
     </section>
+  );
+}
+
+const SWATCH: Record<string, [string, string, string]> = {
+  ocean: ["#07162e", "#13233e", "#243a5e"],
+  midnight: ["#000000", "#121216", "#26262e"],
+  graphite: ["#121315", "#212429", "#373c44"],
+  plum: ["#170b22", "#2a1639", "#472a60"],
+  forest: ["#08170f", "#122b1d", "#234c34"],
+  sunset: ["#1d0f0c", "#361b16", "#5c3025"],
+};
+
+/** Theme cards: the dark surface colours, each shown as three bars. */
+export function PalettePicker() {
+  const t = useT();
+  const palette = useAppearance((s) => s.palette);
+  const set = useAppearance((s) => s.set);
+  return (
+    <div className="flex flex-col gap-2 pt-2">
+      <p className="text-[13px] text-fg-2">{t.customize.palette}</p>
+      <div role="radiogroup" aria-label={t.customize.palette} className="grid grid-cols-2 gap-2">
+        {PALETTES.map((id) => {
+          const on = palette === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => set({ palette: id })}
+              className={cn(
+                "flex items-center gap-3 rounded-[14px] p-2.5 text-left ring-1 transition-colors",
+                on ? "bg-surface-3 ring-accent/60" : "bg-surface-1 ring-line hover:bg-surface-2",
+              )}
+            >
+              <span className="flex h-9 w-11 shrink-0 items-end gap-0.5 rounded-[8px] bg-black/30 p-1">
+                {SWATCH[id]!.map((c) => (
+                  <span key={c} className="h-full flex-1 rounded-[3px]" style={{ background: c }} />
+                ))}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{t.customize.palettes[id]}</span>
+              {on && <CheckIcon size={15} weight="bold" className="text-accent-text" />}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }

@@ -15,7 +15,7 @@ import { useSystem } from "../stores/system";
 import { useUi } from "../stores/ui";
 import { AboutSection } from "./AboutSection";
 import { BackupSection } from "./BackupSection";
-import { AccentPicker, LayoutSection } from "./CustomizeSection";
+import { AccentPicker, LayoutSection, PalettePicker } from "./CustomizeSection";
 import { Modal } from "./Modal";
 
 function Segmented<T extends string>({
@@ -139,6 +139,7 @@ export function SettingsDialog() {
             ]}
           />
           <AccentPicker />
+          <PalettePicker />
         </section>
 
         <section className="flex flex-col gap-2">

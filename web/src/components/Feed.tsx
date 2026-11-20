@@ -1,4 +1,4 @@
-import { ArrowsClockwiseIcon, PlayIcon } from "@phosphor-icons/react";
+import { ArrowsClockwiseIcon, FadersHorizontalIcon, PlayIcon, XIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
 import { api } from "../lib/api";
@@ -7,6 +7,7 @@ import { bumpSeed, CHIPS, currentSeed, feedFor, type Chip, type ShelfDef } from 
 import { cn } from "../lib/format";
 import type { Track } from "../lib/types";
 import { usePlayer } from "../player/player";
+import { isFiltering, useHomePrefs } from "../stores/homePrefs";
 import { AlbumTile } from "./AlbumTiles";
 import { Artwork } from "./Artwork";
 import { Section } from "./Page";
@@ -41,12 +42,46 @@ function Skeleton() {
   );
 }
 
-/** One shelf: loads when it nears the screen, and hides itself when empty or failed. */
-function Shelf({ title, load }: { title: string; load: (signal: AbortSignal) => Promise<DiscoverShelf> }) {
+/** Drops what an earlier shelf already showed (same song, or the same cover under another title). */
+function fresh(data: DiscoverShelf, seen: Set<string>): DiscoverShelf {
+  const own = new Set<string>();
+  const tracks = data.tracks.filter((t) => {
+    if (seen.has(t.id) || (t.art && seen.has(t.art)) || own.has(t.id) || (t.art && own.has(t.art))) return false;
+    own.add(t.id);
+    if (t.art) own.add(t.art);
+    return true;
+  });
+  const albums = data.albums.filter((a) => !seen.has(a.id) && !(a.art && seen.has(a.art)));
+  return { ...data, tracks, albums };
+}
+
+const remember = (data: DiscoverShelf, seen: Set<string>) => {
+  for (const t of data.tracks) {
+    seen.add(t.id);
+    if (t.art) seen.add(t.art);
+  }
+  for (const a of data.albums) {
+    seen.add(a.id);
+    if (a.art) seen.add(a.art);
+  }
+};
+
+/** One shelf: loads when it nears the screen and hands its songs to the feed; hides itself when empty or failed. */
+function Shelf({
+  title,
+  load,
+  onLoaded,
+  view,
+}: {
+  title: string;
+  load: (signal: AbortSignal) => Promise<DiscoverShelf>;
+  onLoaded: (data: DiscoverShelf | "failed") => void;
+  /** What to show once loaded: the shelf's songs minus those shown above it. */
+  view: DiscoverShelf | "failed" | null;
+}) {
   const playList = usePlayer((s) => s.playList);
   const host = useRef<HTMLDivElement>(null);
   const [near, setNear] = useState(false);
-  const [data, setData] = useState<DiscoverShelf | "failed" | null>(null);
 
   useEffect(() => {
     const el = host.current;
@@ -59,24 +94,24 @@ function Shelf({ title, load }: { title: string; load: (signal: AbortSignal) => 
   useEffect(() => {
     if (!near) return;
     const ctl = new AbortController();
-    load(ctl.signal).then(setData, () => !ctl.signal.aborted && setData("failed"));
+    load(ctl.signal).then(onLoaded, () => !ctl.signal.aborted && onLoaded("failed"));
     return () => ctl.abort();
-    // `load` is rebuilt every render; a shelf only loads once.
+    // `load` and `onLoaded` are rebuilt every render; a shelf only loads once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [near]);
 
-  if (data === "failed" || (data && !data.tracks.length && !data.albums.length)) return null;
+  if (view === "failed" || (view && view.tracks.length + view.albums.length < 3)) return null;
   return (
     <div ref={host}>
       <Section title={title}>
-        {!data ? (
+        {!view ? (
           <Skeleton />
         ) : (
           <div className="no-scrollbar flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-1 md:scroll-px-6 md:px-6">
-            {data.tracks.map((tr, i) => (
-              <TrackCard key={tr.id} track={tr} onPlay={() => playList(data.tracks, i)} />
+            {view.tracks.map((tr, i) => (
+              <TrackCard key={tr.id} track={tr} onPlay={() => playList(view.tracks, i)} />
             ))}
-            {data.albums.map((a) => (
+            {view.albums.map((a) => (
               <div key={a.id} className="w-36 shrink-0 snap-start md:w-44">
                 <AlbumTile album={a} />
               </div>
@@ -89,17 +124,22 @@ function Shelf({ title, load }: { title: string; load: (signal: AbortSignal) => 
 }
 
 /** The big cards at the top: what's trending right now. */
-function Hero() {
+function Hero({ onTracks }: { onTracks: (tracks: Track[]) => void }) {
   const t = useT();
   const playList = usePlayer((s) => s.playList);
   const [tracks, setTracks] = useState<Track[]>([]);
   useEffect(() => {
     const ctl = new AbortController();
     api.discoverShelf("yt-trending", ctl.signal).then(
-      (s) => setTracks(s.tracks.slice(0, 8)),
+      (s) => {
+        const top = s.tracks.slice(0, 8);
+        setTracks(top);
+        onTracks(top);
+      },
       () => {},
     );
     return () => ctl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   if (!tracks.length) return <div className="mx-4 h-52 animate-pulse rounded-[24px] bg-surface-2 md:mx-6 md:h-64" />;
   return (
@@ -142,6 +182,8 @@ const CHIP_KEY = "gaanly:feedChip";
 /** Home's music feed: category chips, the featured row, then shelves of new and old songs. Nothing to sign in to. */
 export function Feed() {
   const t = useT();
+  const prefs = useHomePrefs();
+  const filtering = isFiltering(prefs);
   const [chip, setChip] = useState<Chip>(() => {
     try {
       const saved = localStorage.getItem(CHIP_KEY);
@@ -151,7 +193,10 @@ export function Feed() {
     }
   });
   const [seed, setSeed] = useState(currentSeed);
-  const shelves = feedFor(chip, seed);
+  const [loaded, setLoaded] = useState<Record<string, DiscoverShelf | "failed">>({});
+  const [hero, setHero] = useState<Track[]>([]);
+  const shelves = feedFor(chip, seed, { languages: prefs.languages, artists: prefs.artists });
+  const showHero = chip === "all" && !filtering;
 
   const choose = (c: Chip) => {
     setChip(c);
@@ -161,6 +206,23 @@ export function Feed() {
       /* storage unavailable */
     }
   };
+
+  // Songs already shown, in order, so a cover or song never repeats further down.
+  const seen = new Set<string>();
+  if (showHero) remember({ id: "hero", tracks: hero, albums: [] }, seen);
+  const rows = shelves.map((def) => {
+    const key = `${chip}:${seed}:${def.kind === "discover" ? def.id : def.key}`;
+    const data = loaded[key];
+    let view: DiscoverShelf | "failed" | null = null;
+    if (data === "failed") view = "failed";
+    else if (data) {
+      view = fresh(data, seen);
+      if (view.tracks.length + view.albums.length >= 3) remember(view, seen);
+    }
+    return { def, key, view };
+  });
+
+  const summary = [...prefs.languages.map((l) => t.home.feed.chips[l as Chip] ?? l), ...prefs.artists].join(", ");
 
   return (
     <div className="flex flex-col gap-8">
@@ -184,7 +246,22 @@ export function Feed() {
         </div>
         <button
           type="button"
-          onClick={() => setSeed(bumpSeed())}
+          onClick={() => prefs.setTuneOpen(true)}
+          aria-label={t.home.tune.button}
+          title={t.home.tune.button}
+          className={cn(
+            "grid size-9 shrink-0 place-items-center rounded-full ring-1 transition-colors",
+            filtering ? "bg-accent text-accent-ink ring-transparent" : "text-fg-2 ring-line hover:text-fg",
+          )}
+        >
+          <FadersHorizontalIcon size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setSeed(bumpSeed());
+            setLoaded({});
+          }}
           aria-label={t.home.feed.refresh}
           title={t.home.feed.refresh}
           className="mr-4 grid size-9 shrink-0 place-items-center rounded-full text-fg-2 ring-1 ring-line transition-transform hover:text-fg active:rotate-180 md:mr-6"
@@ -193,17 +270,30 @@ export function Feed() {
         </button>
       </div>
 
-      {chip === "all" && <Hero />}
+      {chip === "all" && filtering && (
+        <div className="mx-4 flex items-center gap-3 rounded-full bg-accent-soft py-1.5 pr-1.5 pl-4 text-sm text-accent-text md:mx-6">
+          <span className="min-w-0 flex-1 truncate">{t.home.tune.filtering(summary)}</span>
+          <button type="button" onClick={prefs.clearFilters} aria-label={t.home.tune.clear} className="grid size-8 shrink-0 place-items-center rounded-full hover:bg-accent/20">
+            <XIcon size={16} weight="bold" />
+          </button>
+        </div>
+      )}
 
-      {shelves.map((def) => {
-        const key = `${chip}:${seed}:${def.kind === "discover" ? def.id : def.key}`;
-        const load =
-          def.kind === "discover"
-            ? (signal: AbortSignal) => api.discoverShelf(def.id, signal)
-            : (signal: AbortSignal) =>
-                api.search(def.query, "song", signal).then((tracks) => ({ id: def.key, tracks: tracks.slice(0, 20), albums: [] }));
-        return <Shelf key={key} title={titleOf(def, t)} load={load} />;
-      })}
+      {showHero && <Hero onTracks={setHero} />}
+
+      {rows.map(({ def, key, view }) => (
+        <Shelf
+          key={key}
+          title={titleOf(def, t)}
+          view={view}
+          onLoaded={(data) => setLoaded((l) => ({ ...l, [key]: data }))}
+          load={
+            def.kind === "discover"
+              ? (signal) => api.discoverShelf(def.id, signal)
+              : (signal) => api.search(def.query, "song", signal).then((tracks) => ({ id: def.key, tracks: tracks.slice(0, 20), albums: [] }))
+          }
+        />
+      ))}
       <p className="px-4 text-xs text-fg-3 md:px-6">{t.home.spotifyNote}</p>
     </div>
   );

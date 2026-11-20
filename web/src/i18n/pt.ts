@@ -67,8 +67,26 @@ export const pt: Messages = {
       "yt-new": "Novos álbuns e singles",
       "sp-india": "Spotify Top 50 · Índia",
     },
+    tune: {
+      button: "Ajustar o início",
+      title: "Ajustar o início",
+      languages: "Idiomas",
+      languagesHint: "Escolha o que você ouve. O início mostra só isso. Sem escolha, mostra tudo.",
+      singers: "Cantores e bandas",
+      singerPlaceholder: "Adicione um cantor, como Arijit Singh",
+      add: "Adicionar",
+      suggestions: "Sugestões",
+      playlists: "Playlists nos atalhos",
+      playlistsHint: "Escolha quais playlists aparecem no topo do início.",
+      defaultPlaylists: "Padrão (as 6 primeiras)",
+      clear: "Limpar filtros",
+      done: "Pronto",
+      filtering: (what: string) => `Mostrando só: ${what}`,
+      removeX: (x: string) => `Remover ${x}`,
+      edit: "Escolher playlists",
+    },
     feed: {
-      chips: { all: "Tudo", bangla: "Bengali", hindi: "Hindi", english: "Inglês", punjabi: "Punjabi", kpop: "K-pop", romantic: "Romântico", chill: "Relax", workout: "Treino", party: "Festa" },
+      chips: { all: "Tudo", bangla: "Bengali", hindi: "Hindi", english: "Inglês", urdu: "Urdu", tamil: "Tâmil", telugu: "Telugo", punjabi: "Punjabi", kpop: "K-pop", romantic: "Romântico", chill: "Relax", workout: "Treino", party: "Festa" },
       newSongs: (x: string) => `Novas músicas ${x}`,
       oldSongs: (x: string) => `Clássicos ${x}`,
       hits: (x: string) => `Sucessos ${x}`,
@@ -194,6 +212,22 @@ export const pt: Messages = {
     closePanel: "Fechar painel",
     backToPlayer: "Voltar ao player",
     showQueue: "Ver fila",
+  },
+
+  listen: {
+    lyrics: "Letra",
+    loadingLyrics: "Procurando a letra",
+    noLyrics: "Nenhuma letra encontrada para esta música.",
+    speed: "Velocidade",
+    speedX: (x: string) => `Velocidade ${x}x`,
+    sleep: "Timer para dormir",
+    sleepOff: "Timer: desligado",
+    sleepMinutes: (n: number) => `${n} min`,
+    sleepEnd: "Fim da música",
+    sleepSet: (label: string) => `Timer: ${label}`,
+    sleepDone: "Timer: música pausada. Boa noite!",
+    sleepCancelled: "Timer desligado",
+    lyricsSource: "Letras do LRCLIB",
   },
 
   queue: {
@@ -368,6 +402,8 @@ export const pt: Messages = {
   },
 
   customize: {
+    palette: "Tema",
+    palettes: { ocean: "Oceano", midnight: "Meia-noite (AMOLED)", graphite: "Grafite", plum: "Ameixa", forest: "Floresta", sunset: "Pôr do sol" },
     accent: "Cor de destaque",
     customColor: "Cor personalizada",
     colors: {

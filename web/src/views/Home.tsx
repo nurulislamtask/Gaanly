@@ -9,6 +9,7 @@ import { useT } from "../i18n";
 import { paths } from "../lib/routes";
 import type { Track } from "../lib/types";
 import { usePlayer } from "../player/player";
+import { useHomePrefs } from "../stores/homePrefs";
 import { useAppearance } from "../stores/appearance";
 import { useLibrary } from "../stores/library";
 
@@ -56,6 +57,9 @@ export default function Home() {
   const playList = usePlayer((s) => s.playList);
   const t = useT();
   const show = useAppearance();
+  const playlistIds = useHomePrefs((s) => s.playlistIds);
+  const setTuneOpen = useHomePrefs((s) => s.setTuneOpen);
+  const shortcutPlaylists = playlistIds ? playlists.filter((p) => playlistIds.includes(p.id)) : playlists.slice(0, 6);
   const empty = status === "ready" && !favorites.length && !playlists.length && !history.length;
 
   return (
@@ -67,7 +71,12 @@ export default function Home() {
       </div>
 
       {!empty && status === "ready" && show.homeShortcuts && (
-        <p className="px-4 pb-2 text-xs font-medium tracking-wide text-fg-3 uppercase md:px-6">{t.home.feed.yourLibrary}</p>
+        <div className="flex items-center justify-between px-4 pb-2 md:px-6">
+          <p className="text-xs font-medium tracking-wide text-fg-3 uppercase">{t.home.feed.yourLibrary}</p>
+          <button type="button" onClick={() => setTuneOpen(true)} className="text-xs font-medium text-accent-text hover:underline">
+            {t.home.tune.edit}
+          </button>
+        </div>
       )}
 
       {(empty || status === "loading") && <Feed />}
@@ -95,7 +104,7 @@ export default function Home() {
                 </span>
               }
             />
-            {playlists.slice(0, 6).map((p) => (
+            {shortcutPlaylists.map((p) => (
               <Shortcut
                 key={p.id}
                 to={paths.playlist(p.id)}

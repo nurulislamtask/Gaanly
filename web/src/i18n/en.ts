@@ -72,8 +72,26 @@ export const en = {
       "yt-new": "New albums & singles",
       "sp-india": "Spotify Top 50 · India",
     },
+    tune: {
+      button: "Tune your home",
+      title: "Tune your home",
+      languages: "Languages",
+      languagesHint: "Pick what you listen to. Home will show only these. Pick none to see everything.",
+      singers: "Singers & bands",
+      singerPlaceholder: "Add a singer, like Arijit Singh",
+      add: "Add",
+      suggestions: "Suggestions",
+      playlists: "Playlists in your shortcuts",
+      playlistsHint: "Choose which playlists show at the top of Home.",
+      defaultPlaylists: "Default (first 6)",
+      clear: "Clear filters",
+      done: "Done",
+      filtering: (what: string) => `Showing only: ${what}`,
+      removeX: (x: string) => `Remove ${x}`,
+      edit: "Choose playlists",
+    },
     feed: {
-      chips: { all: "All", bangla: "Bangla", hindi: "Hindi", english: "English", punjabi: "Punjabi", kpop: "K-pop", romantic: "Romantic", chill: "Chill", workout: "Workout", party: "Party" },
+      chips: { all: "All", bangla: "Bangla", hindi: "Hindi", english: "English", urdu: "Urdu", tamil: "Tamil", telugu: "Telugu", punjabi: "Punjabi", kpop: "K-pop", romantic: "Romantic", chill: "Chill", workout: "Workout", party: "Party" },
       newSongs: (x: string) => `New ${x} songs`,
       oldSongs: (x: string) => `Old ${x} classics`,
       hits: (x: string) => `${x} hits`,
@@ -200,6 +218,22 @@ export const en = {
     closePanel: "Close panel",
     backToPlayer: "Back to the player",
     showQueue: "Show queue",
+  },
+
+  listen: {
+    lyrics: "Lyrics",
+    loadingLyrics: "Looking for lyrics",
+    noLyrics: "No lyrics found for this song.",
+    speed: "Playback speed",
+    speedX: (x: string) => `Speed ${x}x`,
+    sleep: "Sleep timer",
+    sleepOff: "Sleep timer: off",
+    sleepMinutes: (n: number) => `${n} min`,
+    sleepEnd: "End of song",
+    sleepSet: (label: string) => `Sleep timer: ${label}`,
+    sleepDone: "Sleep timer: music paused. Good night!",
+    sleepCancelled: "Sleep timer off",
+    lyricsSource: "Lyrics from LRCLIB",
   },
 
   queue: {
@@ -374,6 +408,8 @@ export const en = {
   },
 
   customize: {
+    palette: "Theme",
+    palettes: { ocean: "Ocean", midnight: "Midnight (AMOLED)", graphite: "Graphite", plum: "Plum", forest: "Forest", sunset: "Sunset" },
     accent: "Accent color",
     customColor: "Custom color",
     colors: {

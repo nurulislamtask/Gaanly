@@ -7,6 +7,7 @@ import { PlayerBar } from "./components/PlayerBar";
 import { Rail } from "./components/Rail";
 import { TitleBar } from "./components/TitleBar";
 import { desktop } from "./lib/desktop";
+import { TuneDialog } from "./components/TuneDialog";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { Toasts } from "./components/Toasts";
 import { UpdateBanner } from "./components/UpdateBanner";
@@ -161,6 +162,7 @@ export default function App() {
       <AddToPlaylistDialog />
       <ShortcutsDialog />
       <SettingsDialog />
+      <TuneDialog />
       <UpdateBanner />
       <Toasts />
     </div>

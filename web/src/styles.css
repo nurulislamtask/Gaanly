@@ -62,6 +62,27 @@
   --aura-3: rgb(255 154 92 / 0.16);
 }
 
+/* Surface palettes (Settings > Appearance). Dark theme only; the light theme keeps its own surfaces. */
+:root[data-palette="midnight"]:not([data-theme="light"]) {
+  --bg: #000000; --surface-1: #0a0a0c; --surface-2: #121216; --surface-3: #1b1b21; --surface-4: #26262e;
+  --accent-ink: #000000;
+}
+:root[data-palette="graphite"]:not([data-theme="light"]) {
+  --bg: #121315; --surface-1: #1a1c1f; --surface-2: #212429; --surface-3: #2b2f35; --surface-4: #373c44;
+}
+:root[data-palette="plum"]:not([data-theme="light"]) {
+  --bg: #170b22; --surface-1: #20102e; --surface-2: #2a1639; --surface-3: #371e4b; --surface-4: #472a60;
+  --aura-1: rgb(167 139 250 / 0.22); --aura-2: rgb(244 114 182 / 0.16);
+}
+:root[data-palette="forest"]:not([data-theme="light"]) {
+  --bg: #08170f; --surface-1: #0d2016; --surface-2: #122b1d; --surface-3: #193a27; --surface-4: #234c34;
+  --aura-1: rgb(52 211 153 / 0.2); --aura-2: rgb(163 230 53 / 0.1);
+}
+:root[data-palette="sunset"]:not([data-theme="light"]) {
+  --bg: #1d0f0c; --surface-1: #2a1511; --surface-2: #361b16; --surface-3: #47241c; --surface-4: #5c3025;
+  --aura-1: rgb(251 124 92 / 0.22); --aura-2: rgb(251 191 36 / 0.14);
+}
+
 /* Glass: panels are frosted and let the aurora behind them show through. Settings > Layout > Glass turns it off
    (solid panels, no blur): lighter on slow phones. */
 :root {

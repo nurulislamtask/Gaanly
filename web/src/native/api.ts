@@ -12,6 +12,7 @@ import {
   searchAlbums,
 } from "../../../server/src/browse";
 import { discoverShelf, isShelfId, spotifyLink, spotifyTracks } from "../../../server/src/discover";
+import { lyricsFor } from "../../../server/src/lyrics";
 import { msg, tr, type MsgKey } from "../../../server/src/i18n";
 import * as library from "../../../server/src/library";
 import { findVideoFor, radio, search, suggestions } from "../../../server/src/search";
@@ -71,6 +72,7 @@ export const api: GaanlyApi = {
       if (!isShelfId(id)) throw fail(400, "invalidGenre");
       return discoverShelf(id, getLang());
     }, signal),
+  lyrics: (t, signal) => call(() => lyricsFor(t.title, t.artist, t.duration), signal),
   radio: (id) => call(() => radio(id)),
   genres: () => call(() => genres(getLang())),
   genre: (id, signal) =>
