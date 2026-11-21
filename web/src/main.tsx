@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App";
+import { CrashGuard } from "./components/CrashGuard";
 import { desktop } from "./lib/desktop";
 import "./styles.css";
 import "./tv/tv.css";
@@ -18,8 +19,10 @@ installTvMode();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <CrashGuard>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </CrashGuard>
   </StrictMode>,
 );
