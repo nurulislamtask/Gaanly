@@ -23,7 +23,7 @@ import type { Track } from "../lib/types";
 import { selectCurrent, usePlayer, useStatusText } from "../player/player";
 import { useUi, type PanelTab } from "../stores/ui";
 import { Artwork } from "./Artwork";
-import { FavoriteButton, ModeSwitch, Scrubber, Transport } from "./Controls";
+import { FavoriteButton, ModeSwitch, Scrubber } from "./Controls";
 import { IconButton } from "./IconButton";
 import { DownloadButton, ListenTools } from "./ListenTools";
 import { LyricsView } from "./LyricsView";
