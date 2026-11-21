@@ -98,6 +98,7 @@ export function Scrubber({ touch = false, className }: { touch?: boolean; classN
   const duration = usePlayer((s) => s.duration);
   const buffered = usePlayer((s) => s.buffered);
   const seek = usePlayer((s) => s.seek);
+  const status = usePlayer((s) => s.status);
   const [scrub, setScrub] = useState<number | null>(null);
   const shown = scrub ?? position;
 
@@ -107,7 +108,7 @@ export function Scrubber({ touch = false, className }: { touch?: boolean; classN
   if (touch) {
     return (
       <div className={className}>
-        <Slider label={t.player.progress} value={position} max={duration} buffered={buffered} onChange={seek} onScrub={setScrub} showThumb step={5} valueText={formatTime} />
+        <Slider label={t.player.progress} value={position} max={duration} buffered={buffered} onChange={seek} onScrub={setScrub} showThumb wavy still={status !== "playing"} step={5} valueText={formatTime} />
         <div className="mt-0.5 flex justify-between">
           {time}
           {total}

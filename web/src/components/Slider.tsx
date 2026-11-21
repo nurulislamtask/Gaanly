@@ -14,6 +14,9 @@ interface Props {
   /** Show the thumb at rest (touch layouts), not only on hover. */
   showThumb?: boolean;
   onScrub?: (v: number | null) => void;
+  /** Material 3 Expressive: the played part is a moving wave (still when `still`). */
+  wavy?: boolean;
+  still?: boolean;
   className?: string;
 }
 
@@ -28,6 +31,8 @@ export function Slider({
   valueText,
   showThumb,
   onScrub,
+  wavy,
+  still,
   className,
 }: Props) {
   const track = useRef<HTMLDivElement>(null);
@@ -97,8 +102,17 @@ export function Slider({
       onPointerUp={onPointerUp}
       onPointerCancel={() => update(null)}
       onKeyDown={onKeyDown}
-      className={cn("group relative flex h-5 cursor-pointer touch-none items-center select-none", className)}
+      className={cn("group relative flex h-6 cursor-pointer touch-none items-center select-none", className)}
     >
+      {wavy ? (
+        <div ref={track} className="relative flex h-4 w-full items-center">
+          <div className="absolute inset-x-0 h-[5px] rounded-full bg-surface-4" />
+          <div className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${pct}%` }}>
+            <div className={cn("wave h-full w-full bg-accent", still && "wave-still")} />
+          </div>
+          <div className="pointer-events-none absolute top-1/2 h-6 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent" style={{ left: `${pct}%` }} />
+        </div>
+      ) : (
       <div ref={track} className="relative h-1 w-full overflow-hidden rounded-full bg-surface-4 transition-[height] duration-200 group-hover:h-1.5">
         <div className="absolute inset-y-0 left-0 bg-fg-3/40" style={{ width: `${bufPct}%` }} />
         <div
@@ -109,8 +123,10 @@ export function Slider({
           style={{ width: `${pct}%` }}
         />
       </div>
+      )}
       <div
         className={cn(
+          wavy && "hidden",
           "pointer-events-none absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fg shadow-[0_1px_4px_rgb(0_0_0/0.4)] transition-opacity",
           showThumb || drag !== null ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100",
         )}

@@ -1,3 +1,4 @@
+import { usePlayer } from "../player/player";
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cn } from "../lib/format";
 
@@ -38,6 +39,8 @@ export const PlayDisc = forwardRef<HTMLButtonElement, Omit<Props, "active"> & { 
   { label, className, children, px = 48, ...rest },
   ref,
 ) {
+  // Material 3 Expressive: the button changes shape with the state, a soft square at rest and a circle while playing.
+  const playing = usePlayer((s) => s.status === "playing");
   return (
     <button
       ref={ref}
@@ -46,8 +49,9 @@ export const PlayDisc = forwardRef<HTMLButtonElement, Omit<Props, "active"> & { 
       title={label}
       style={{ width: px, height: px }}
       className={cn(
-        "grid shrink-0 place-items-center rounded-full bg-accent text-accent-ink",
-        "shadow-[inset_0_1px_0_rgb(255_255_255/0.45)] transition-transform duration-200 ease-out-expo",
+        "grid shrink-0 place-items-center bg-accent text-accent-ink",
+        playing ? "rounded-full" : "rounded-[34%]",
+        "shadow-[inset_0_1px_0_rgb(255_255_255/0.45),0_10px_26px_color-mix(in_srgb,var(--accent)_35%,transparent)] transition-[transform,border-radius] duration-300 ease-out-expo",
         "hover:scale-[1.04] active:scale-[0.95] disabled:opacity-40",
         className,
       )}

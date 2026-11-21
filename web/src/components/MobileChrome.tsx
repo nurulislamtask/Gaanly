@@ -18,9 +18,9 @@ export function TabBar() {
   return (
     <nav
       aria-label={t.nav.main}
-      className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-line bg-bg/85 backdrop-blur-xl"
+      className="fixed inset-x-4 bottom-[calc(10px+env(safe-area-inset-bottom))] z-20 mx-auto max-w-md"
     >
-      <ul className="mx-auto grid h-16 max-w-md grid-cols-3">
+      <ul className="glass grid h-[68px] grid-cols-3 rounded-[34px] p-1.5 shadow-[0_14px_40px_rgb(0_0_0/0.4)] ring-1 ring-line">
         {tabs.map(({ to, key, Icon, end }) => (
           <li key={to}>
             <NavLink
@@ -28,19 +28,13 @@ export function TabBar() {
               end={end}
               className={({ isActive }) =>
                 cn(
-                  "relative flex h-full flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
-                  isActive ? "text-fg" : "text-fg-3",
+                  "relative flex h-full flex-col items-center justify-center gap-0.5 rounded-[28px] text-[11px] font-medium transition-colors duration-300",
+                  isActive ? "bg-accent-soft text-accent-text" : "text-fg-3",
                 )
               }
             >
               {({ isActive }) => (
                 <>
-                  <span
-                    className={cn(
-                      "absolute top-0 h-[3px] w-8 rounded-b-full bg-accent transition-transform duration-300 ease-out-expo",
-                      isActive ? "scale-x-100" : "scale-x-0",
-                    )}
-                  />
                   <Icon size={24} weight={isActive ? "fill" : "regular"} />
                   {t.nav[key]}
                 </>
@@ -66,16 +60,16 @@ export function MiniPlayer() {
   const pct = duration > 0 ? Math.min(100, (position / duration) * 100) : 0;
 
   return (
-    <div className="fixed inset-x-2 bottom-[calc(72px+env(safe-area-inset-bottom))] z-20">
-      <div className="island p-1! shadow-[0_10px_30px_rgb(0_0_0/0.35)]">
-        <div className="island-core relative flex h-14 items-center gap-3 overflow-hidden pr-1 pl-1.5">
+    <div className="fixed inset-x-2 bottom-[calc(88px+env(safe-area-inset-bottom))] z-20">
+      <div className="island rounded-[30px]! p-1! shadow-[0_10px_30px_rgb(0_0_0/0.35)]">
+        <div className="island-core relative flex h-14 rounded-[26px]! items-center gap-3 overflow-hidden pr-1 pl-1.5">
           <button
             type="button"
             onClick={() => navigate({ hash: NOW_PLAYING_HASH })}
             className="flex min-w-0 flex-1 items-center gap-3 text-left"
             aria-label={t.player.openNowPlaying(track.title)}
           >
-            <Artwork src={track.thumb} className="size-11 rounded-[10px]" />
+            <Artwork src={track.thumb} className="size-11 rounded-[16px]" />
             <span className="min-w-0">
               <span className="block truncate text-sm font-medium">{track.title}</span>
               <span className={cn("block truncate text-xs", status === "error" ? "text-danger" : "text-fg-2")}>

@@ -123,7 +123,7 @@ export default function App() {
           ref={main}
           className={cn(
             "scroll-area relative min-w-0 flex-1 overflow-y-auto md:pane md:rounded-[20px] md:ring-1 md:ring-line",
-            hasTrack ? "pb-[calc(152px+env(safe-area-inset-bottom))]" : "pb-[calc(88px+env(safe-area-inset-bottom))]",
+            hasTrack ? "pb-[calc(170px+env(safe-area-inset-bottom))]" : "pb-[calc(104px+env(safe-area-inset-bottom))]",
             "md:pb-0",
           )}
         >
