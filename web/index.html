@@ -12,6 +12,29 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>Gaanly</title>
     <script>
+      // Safety net: if the app fails before it can draw anything, say why instead of leaving a blank screen.
+      (function () {
+        var errs = [];
+        function show() {
+          var r = document.getElementById("root");
+          if (!errs.length || (r && r.childElementCount)) return;
+          var d = document.createElement("div");
+          d.style.cssText = "position:fixed;inset:0;z-index:99999;padding:24px;background:#06142e;color:#fff;font:14px system-ui;overflow:auto";
+          d.textContent = "Gaanly could not start\n\n" + errs.join("\n\n") + "\n\n" + navigator.userAgent;
+          d.style.whiteSpace = "pre-wrap";
+          var b = document.createElement("button");
+          b.textContent = "Reset app settings and reload";
+          b.style.cssText = "display:block;margin-top:16px;padding:10px 18px;border-radius:999px;background:#fff;color:#000";
+          b.onclick = function () { try { localStorage.clear(); } catch (e) {} location.reload(); };
+          d.appendChild(b);
+          document.body.appendChild(d);
+        }
+        window.addEventListener("error", function (e) { errs.push(String(e.message) + " (" + String(e.filename || "").split("/").pop() + ":" + e.lineno + ")"); setTimeout(show, 1500); });
+        window.addEventListener("unhandledrejection", function (e) { errs.push("Promise: " + String((e.reason && (e.reason.stack || e.reason.message)) || e.reason)); });
+        setTimeout(function () { var r = document.getElementById("root"); if (r && !r.childElementCount) { if (!errs.length) errs.push("Nothing was drawn after 6 seconds (no error reported)."); show(); } }, 6000);
+      })();
+    </script>
+    <script>
       try {
         var t = localStorage.getItem("gaanly:theme");
         if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
