@@ -1,6 +1,6 @@
 import { CaretLeftIcon, CaretRightIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { desktop } from "../lib/desktop";
 import { cn } from "../lib/format";
 import { selectCurrent, usePlayer } from "../player/player";
