@@ -116,6 +116,11 @@ export const en = {
   },
 
   collection: {
+    filterIn: "Filter in this list",
+    sortDefault: "Default order",
+    sortTitle: "Title A–Z",
+    sortArtist: "Artist A–Z",
+    sortNewest: "Newest first",
     labelPlaylist: "Playlist",
     labelFavorites: "Collection",
     labelHistory: "History",
@@ -262,6 +267,14 @@ export const en = {
     cardMade: "Picture ready",
     savePlaylist: "Save as playlist",
     playlistSaved: (n: number) => `Saved ${n} songs as a playlist`,
+    returnCurrent: "Return to current",
+    syncOffset: "Lyrics timing",
+    synced: "Synced",
+    plainLyrics: "Plain text",
+    eqFlat: "Flat (0 dB)",
+    eqBassPlus: "+2 dB Bass",
+    eqTreblePlus: "+2 dB Treble",
+    play: "Play",
     lyricsSource: "Lyrics from LRCLIB",
   },
 

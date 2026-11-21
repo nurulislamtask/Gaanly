@@ -111,6 +111,11 @@ export const pt: Messages = {
   },
 
   collection: {
+    filterIn: "Filtrar nesta lista",
+    sortDefault: "Ordem padrão",
+    sortTitle: "Título A–Z",
+    sortArtist: "Artista A–Z",
+    sortNewest: "Mais recentes",
     labelPlaylist: "Playlist",
     labelFavorites: "Coleção",
     labelHistory: "Histórico",
@@ -256,6 +261,14 @@ export const pt: Messages = {
     cardMade: "Imagem pronta",
     savePlaylist: "Salvar como playlist",
     playlistSaved: (n: number) => `${n} músicas salvas como playlist`,
+    returnCurrent: "Voltar ao atual",
+    syncOffset: "Sincronia da letra",
+    synced: "Sincronizada",
+    plainLyrics: "Texto simples",
+    eqFlat: "Plano (0 dB)",
+    eqBassPlus: "+2 dB Grave",
+    eqTreblePlus: "+2 dB Agudo",
+    play: "Tocar",
     lyricsSource: "Letras do LRCLIB",
   },
 

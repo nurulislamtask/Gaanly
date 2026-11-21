@@ -32,6 +32,8 @@ interface EqState {
   setEnabled: (v: boolean) => void;
   setPreset: (id: PresetId) => void;
   setGain: (band: number, db: number) => void;
+  /** Adds these gains (dB per band) to the current curve. */
+  nudge: (delta: number[]) => void;
 }
 
 function read(): { enabled: boolean; preset: string; gains: number[] } {
@@ -79,6 +81,7 @@ export const useEqualizer = create<EqState>((set, get) => {
     setOpen: (open) => set({ open }),
     setEnabled: (enabled) => save({ enabled }),
     setPreset: (id) => save({ preset: id, gains: [...PRESETS[id]!], enabled: true }),
+    nudge: (delta) => save({ preset: "custom", gains: get().gains.map((g, i) => Math.max(-12, Math.min(12, g + (delta[i] ?? 0)))), enabled: true }),
     setGain: (band, db) => save({ preset: "custom", gains: get().gains.map((g, i) => (i === band ? db : g)), enabled: true }),
   };
 });

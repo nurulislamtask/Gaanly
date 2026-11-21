@@ -1,31 +1,40 @@
-import { ShareNetworkIcon } from "@phosphor-icons/react";
+import { ArrowDownIcon, MinusIcon, PlusIcon, ShareNetworkIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
 import { api } from "../lib/api";
 import type { Lyrics } from "../lib/apiTypes";
 import { cn } from "../lib/format";
 import { quoteCard, shareImage } from "../lib/quoteCard";
-import { useUi } from "../stores/ui";
 import { selectCurrent, usePlayer } from "../player/player";
+import { useUi } from "../stores/ui";
 
 type State = { id: string; lyrics: Lyrics | null } | "loading";
 
-/** Lyrics that follow the song: the current line is bright, the rest fade and blur with distance. Tap a line to jump there. */
-export function LyricsView({ className }: { className?: string }) {
+/**
+ * Lyrics that follow the song: the current line is big and bright with a soft glow, the rest fade and blur with
+ * distance. Tap a line to jump there; a nudge control fixes lyrics that run early or late.
+ * `full` is the phone's full-screen reading view: bigger, left-aligned text.
+ */
+export function LyricsView({ className, full = false }: { className?: string; full?: boolean }) {
   const t = useT();
   const track = usePlayer(selectCurrent);
   const position = usePlayer((s) => s.position);
   const seek = usePlayer((s) => s.seek);
-  const [state, setState] = useState<State>("loading");
   const toast = useUi((s) => s.toast);
   const [picked, setPicked] = useState<number | null>(null);
+  const [offset, setOffset] = useState(0);
+  const [detached, setDetached] = useState(false);
+  const [state, setState] = useState<State>("loading");
   const box = useRef<HTMLDivElement>(null);
   const lines = useRef<(HTMLButtonElement | null)[]>([]);
+  const programmatic = useRef(false);
   const id = track?.id;
 
   useEffect(() => {
     if (!track) return;
     setState("loading");
+    setOffset(0);
+    setDetached(false);
     const ctl = new AbortController();
     const forId = track.id;
     api.lyrics(track, ctl.signal).then(
@@ -42,16 +51,23 @@ export function LyricsView({ className }: { className?: string }) {
   const synced = lyrics?.synced ?? [];
   let active = -1;
   for (let i = 0; i < synced.length; i++) {
-    if (synced[i]!.t <= position + 0.25) active = i;
+    if (synced[i]!.t <= position + offset + 0.25) active = i;
     else break;
   }
 
-  useEffect(() => {
-    const el = lines.current[active];
+  const center = (i: number, smooth = true) => {
+    const el = lines.current[i];
     const parent = box.current;
     if (!el || !parent) return;
-    parent.scrollTo({ top: el.offsetTop - parent.clientHeight / 2 + el.clientHeight / 2, behavior: "smooth" });
-  }, [active]);
+    programmatic.current = true;
+    parent.scrollTo({ top: el.offsetTop - parent.clientHeight / 3 + el.clientHeight / 2, behavior: smooth ? "smooth" : "auto" });
+    setTimeout(() => (programmatic.current = false), 700);
+  };
+
+  useEffect(() => {
+    if (!detached) center(active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, detached]);
 
   if (state === "loading" || state.id !== id) {
     return <p className="px-2 py-16 text-center text-sm text-fg-2">{t.listen.loadingLyrics}</p>;
@@ -60,9 +76,30 @@ export function LyricsView({ className }: { className?: string }) {
     return <p className="px-2 py-16 text-center text-sm text-fg-2">{t.listen.noLyrics}</p>;
   }
 
+  const line = synced.length ? synced[picked ?? Math.max(active, 0)]?.text : lyrics.plain.split("\n")[picked ?? -1];
+
   return (
-    <div className={cn("flex min-h-0 flex-col", className)}>
-      <div ref={box} className="scroll-area relative flex-1 overflow-y-auto px-3 py-[30%] text-center">
+    <div className={cn("relative flex min-h-0 flex-col", className)}>
+      <div className="flex items-center gap-2 px-1 pb-2 text-xs text-fg-2">
+        <span className="rounded-full bg-black/25 px-3 py-1.5 font-medium ring-1 ring-white/10">{synced.length ? t.listen.synced : t.listen.plainLyrics} · LRCLIB</span>
+        {synced.length > 0 && (
+          <span className="ml-auto flex items-center gap-1 rounded-full bg-black/25 p-1 ring-1 ring-white/10" aria-label={t.listen.syncOffset} title={t.listen.syncOffset}>
+            <button type="button" onClick={() => setOffset((o) => Math.round((o - 0.5) * 10) / 10)} className="grid size-7 place-items-center rounded-full hover:bg-white/10" aria-label="-0.5s">
+              <MinusIcon size={14} />
+            </button>
+            <span className="w-11 text-center font-mono tabular-nums">{offset > 0 ? "+" : ""}{offset.toFixed(1)}s</span>
+            <button type="button" onClick={() => setOffset((o) => Math.round((o + 0.5) * 10) / 10)} className="grid size-7 place-items-center rounded-full hover:bg-white/10" aria-label="+0.5s">
+              <PlusIcon size={14} />
+            </button>
+          </span>
+        )}
+      </div>
+
+      <div
+        ref={box}
+        onScroll={() => !programmatic.current && setDetached(true)}
+        className={cn("scroll-area relative flex-1 overflow-y-auto", full ? "px-1 pt-[18%] pb-[60%]" : "px-3 py-[30%] text-center")}
+      >
         {synced.length ? (
           synced.map((l, i) => {
             const d = active < 0 ? i + 1 : Math.abs(i - active);
@@ -75,12 +112,19 @@ export function LyricsView({ className }: { className?: string }) {
                 type="button"
                 onClick={() => {
                   setPicked(i);
+                  setDetached(false);
                   seek(l.t);
                 }}
-                style={{ filter: d === 0 ? "none" : `blur(${Math.min(3.5, d * 0.9)}px)`, opacity: d === 0 ? 1 : Math.max(0.28, 0.75 - d * 0.14) }}
+                style={{
+                  filter: d === 0 ? "none" : `blur(${Math.min(3.5, d * 0.9)}px)`,
+                  opacity: d === 0 ? 1 : Math.max(0.28, 0.75 - d * 0.14),
+                  textShadow: d === 0 ? "0 0 24px rgb(255 255 255 / 0.35)" : undefined,
+                }}
                 className={cn(
-                  "block w-full py-2 text-balance transition-[filter,opacity,transform,color] duration-500",
-                  d === 0 ? "scale-105 text-[22px] leading-snug font-bold text-accent-text" : "text-lg leading-snug font-semibold text-fg",
+                  "block w-full text-balance transition-[filter,opacity,transform,color] duration-500",
+                  full ? "origin-left py-3 text-left" : "py-2",
+                  full ? "text-[30px] leading-[1.15] font-bold" : d === 0 ? "text-[22px] leading-snug font-bold" : "text-lg leading-snug font-semibold",
+                  d === 0 ? (full ? "text-white" : "scale-105 text-accent-text") : "text-fg",
                 )}
               >
                 {l.text || "♪"}
@@ -93,32 +137,41 @@ export function LyricsView({ className }: { className?: string }) {
               key={i}
               type="button"
               onClick={() => setPicked(i)}
-              className={cn("block w-full py-1 text-[17px] leading-7 font-medium", picked === i ? "text-accent-text" : "text-fg")}
+              className={cn("block w-full py-1 text-[17px] leading-7 font-medium", full && "text-left text-[22px] leading-9", picked === i ? "text-accent-text" : "text-fg")}
             >
-              {l || "\u00a0"}
+              {l || " "}
             </button>
           ))
         )}
       </div>
-      {(() => {
-        const line = synced.length ? synced[picked ?? Math.max(active, 0)]?.text : lyrics.plain.split("\n")[picked ?? -1];
-        if (!line?.trim() || !track) return null;
-        return (
-          <button
-            type="button"
-            onClick={() =>
-              quoteCard(line, track).then(
-                (blob) => shareImage(blob, `${track.title}`.slice(0, 40)).then(() => toast(t.listen.cardMade)),
-                () => {},
-              )
-            }
-            className="mx-auto mt-2 flex h-10 items-center gap-2 rounded-full bg-accent-soft px-5 text-sm font-medium text-accent-text active:scale-95"
-          >
-            <ShareNetworkIcon size={17} /> {t.listen.shareCard}
-          </button>
-        );
-      })()}
-      <p className="px-3 pt-2 text-center text-[11px] text-fg-3">{t.listen.lyricsSource}</p>
+
+      {detached && synced.length > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            setDetached(false);
+            center(active);
+          }}
+          className="absolute right-2 bottom-16 flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-black shadow-lg active:scale-95"
+        >
+          <ArrowDownIcon size={16} weight="bold" /> {t.listen.returnCurrent}
+        </button>
+      )}
+
+      {line?.trim() && track && (
+        <button
+          type="button"
+          onClick={() =>
+            quoteCard(line, track).then(
+              (blob) => shareImage(blob, `${track.title}`.slice(0, 40)).then(() => toast(t.listen.cardMade)),
+              () => {},
+            )
+          }
+          className="mx-auto mt-2 flex h-10 items-center gap-2 rounded-full bg-black/30 px-5 text-sm font-medium text-white ring-1 ring-white/15 backdrop-blur-md active:scale-95"
+        >
+          <ShareNetworkIcon size={17} /> {t.listen.shareCard}
+        </button>
+      )}
     </div>
   );
 }

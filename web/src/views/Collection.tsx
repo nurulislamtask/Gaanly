@@ -1,9 +1,9 @@
 import { DotsThreeIcon, MagnifyingGlassIcon, PauseIcon, PencilSimpleIcon, PlayIcon, ShuffleIcon, TrashIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Cover, type CoverKind } from "../components/Cover";
 import { NamePlaylistDialog } from "../components/Dialogs";
-import { IconButton, PlayDisc } from "../components/IconButton";
+import { IconButton } from "../components/IconButton";
 import { Modal } from "../components/Modal";
 import { EmptyState, PageHeader } from "../components/Page";
 import { TrackList } from "../components/TrackList";
@@ -30,6 +30,8 @@ export default function Collection({ kind }: Props) {
   const [renaming, setRenaming] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [filter, setFilter] = useState("");
+  const [sort, setSort] = useState<"default" | "title" | "artist" | "newest">("default");
   const t = useT();
 
   const playlist = kind === "playlist" ? lib.playlists.find((p) => p.id === id) : undefined;
@@ -57,6 +59,15 @@ export default function Collection({ kind }: Props) {
     );
   }
 
+  const shown = useMemo(() => {
+    const q = filter.trim().toLowerCase();
+    let list = q ? tracks.filter((x) => `${x.title} ${x.artist} ${x.album ?? ""}`.toLowerCase().includes(q)) : tracks;
+    if (sort === "title") list = [...list].sort((a, b) => a.title.localeCompare(b.title));
+    else if (sort === "artist") list = [...list].sort((a, b) => a.artist.localeCompare(b.artist));
+    else if (sort === "newest") list = [...list].reverse();
+    return list;
+  }, [tracks, filter, sort]);
+
   const total = tracks.reduce((sum, t) => sum + (t.duration || 0), 0);
   // The queue holds exactly these tracks, so this collection is the current playback context.
   const isThisPlaying = tracks.length > 0 && queue.length === tracks.length && queue.every((t) => tracks.some((x) => x.id === t.id));
@@ -67,7 +78,15 @@ export default function Collection({ kind }: Props) {
       <PageHeader title={name} mobileOnly />
 
       <div className="relative">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-20 h-72 bg-linear-to-b from-accent-soft to-transparent" />
+        {tracks[0] && (
+          <img
+            src={tracks[0].art || tracks[0].thumb}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 -top-24 h-[420px] w-full scale-110 object-cover opacity-45 blur-2xl"
+          />
+        )}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-24 h-[420px] bg-linear-to-b from-accent-soft/40 via-bg/60 to-bg" />
         <div className="relative flex flex-col items-center gap-5 px-4 pt-2 pb-6 md:flex-row md:items-end md:gap-6 md:px-6 md:pt-10">
           <Cover
             kind={kind}
@@ -86,36 +105,61 @@ export default function Collection({ kind }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 px-4 pb-4 md:px-6">
-        <PlayDisc
-          label={playing ? t.common.pause : t.common.playX(name)}
-          px={56}
-          disabled={!tracks.length}
-          onClick={() => (isThisPlaying ? toggle() : playList(tracks, 0))}
-        >
-          {playing ? <PauseIcon size={24} weight="fill" /> : <PlayIcon size={24} weight="fill" />}
-        </PlayDisc>
+      <div className="flex items-center gap-3 px-4 pb-4 md:px-6">
         <IconButton
           label={t.collection.shuffle}
           size="lg"
           disabled={!tracks.length}
-          onClick={() => {
-            const order = shuffled(tracks);
-            playList(order, 0);
-          }}
+          className="size-14! rounded-full! bg-surface-3 ring-1 ring-line"
+          onClick={() => playList(shuffled(shown.length ? shown : tracks), 0)}
         >
           <ShuffleIcon size={24} />
         </IconButton>
+        <button
+          type="button"
+          disabled={!tracks.length}
+          aria-label={playing ? t.common.pause : t.common.playX(name)}
+          onClick={() => (isThisPlaying ? toggle() : playList(shown, 0))}
+          className="flex h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-accent px-8 text-lg font-semibold text-accent-ink shadow-[0_12px_30px_color-mix(in_srgb,var(--accent)_35%,transparent)] transition-transform active:scale-[0.97] disabled:opacity-40 md:max-w-48 md:flex-none"
+        >
+          {playing ? <PauseIcon size={24} weight="fill" /> : <PlayIcon size={24} weight="fill" />}
+          {playing ? t.common.pause : t.listen.play}
+        </button>
         {kind === "playlist" && (
-          <IconButton label={t.collection.more} size="lg" onClick={() => setMoreOpen(true)}>
+          <IconButton label={t.collection.more} size="lg" className="size-14! rounded-full! bg-surface-3 ring-1 ring-line" onClick={() => setMoreOpen(true)}>
             <DotsThreeIcon size={26} weight="bold" />
           </IconButton>
         )}
       </div>
 
+      {tracks.length > 4 && (
+        <div className="flex items-center gap-2 px-4 pb-3 md:px-6">
+          <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full bg-surface-2 px-4 ring-1 ring-line focus-within:ring-accent/60 md:max-w-sm">
+            <MagnifyingGlassIcon size={18} className="shrink-0 text-fg-3" />
+            <input
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder={t.collection.filterIn}
+              className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-fg-3"
+            />
+          </label>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as typeof sort)}
+            aria-label={t.collection.sortDefault}
+            className="h-11 rounded-full bg-surface-2 px-4 text-sm ring-1 ring-line outline-none"
+          >
+            <option value="default">{t.collection.sortDefault}</option>
+            <option value="title">{t.collection.sortTitle}</option>
+            <option value="artist">{t.collection.sortArtist}</option>
+            <option value="newest">{t.collection.sortNewest}</option>
+          </select>
+        </div>
+      )}
+
       <div className="px-2 md:px-3">
         {tracks.length > 0 ? (
-          <TrackList tracks={tracks} playlistId={playlist?.id} showAlbum />
+          <TrackList tracks={shown} context={shown} playlistId={playlist?.id} showAlbum />
         ) : (
           <EmptyState
             icon={<MagnifyingGlassIcon size={28} />}
