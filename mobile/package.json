@@ -1,7 +1,7 @@
 {
   "name": "@gaanly/mobile",
   "private": true,
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Gaanly for Android: the web app with the server's work done on the phone (Capacitor).",
   "type": "module",
   "scripts": {
