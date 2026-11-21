@@ -1,10 +1,9 @@
 import { create } from "zustand";
 import { setEqualizerBands } from "../player/effects";
+import { nativeEq } from "./nativeEq";
 import { audioElement, usePlayer } from "../player/player";
 
-/** Set by the Android app: the phone's own equaliser (the web side can't reach the speaker mix there). */
-export const nativeEq: { set?: (gains: number[]) => Promise<boolean> } = {};
-
+export { nativeEq } from "./nativeEq";
 export const PRESETS: Record<string, number[]> = {
   flat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   bass: [7, 6, 5, 3, 1, 0, 0, 0, 0, 0],

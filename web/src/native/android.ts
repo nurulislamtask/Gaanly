@@ -1,7 +1,7 @@
 import { App } from "@capacitor/app";
 import { Capacitor, registerPlugin, SystemBars, SystemBarsStyle } from "@capacitor/core";
 import { registerNativeUpdater } from "../lib/update";
-import { nativeEq } from "../stores/equalizer";
+import { nativeEq } from "../stores/nativeEq";
 import { installTvMode } from "../tv/tvMode";
 
 /** GaanlyDevicePlugin.java: what kind of device this is, and the in-app updater. */
