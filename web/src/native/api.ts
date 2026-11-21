@@ -11,7 +11,8 @@ import {
   genres,
   searchAlbums,
 } from "../../../server/src/browse";
-import { discoverShelf, isShelfId, spotifyLink, spotifyTracks } from "../../../server/src/discover";
+import { appleLink, appleTracks, discoverShelf, isShelfId, spotifyLink, spotifyTracks } from "../../../server/src/discover";
+import { translateLines } from "../../../server/src/translate";
 import { lyricsFor } from "../../../server/src/lyrics";
 import { msg, tr, type MsgKey } from "../../../server/src/i18n";
 import * as library from "../../../server/src/library";
@@ -64,6 +65,8 @@ export const api: GaanlyApi = {
       const text = q.trim().slice(0, 200);
       const link = spotifyLink(text);
       if (link) return spotifyTracks(link, getLang());
+      const apple = appleLink(text);
+      if (apple) return appleTracks(apple, getLang());
       return search(text, type, getLang());
     }, signal),
   suggest: (q, signal) => call(() => suggestions(q.trim().slice(0, 100), getLang()).catch(() => []), signal),
@@ -72,6 +75,7 @@ export const api: GaanlyApi = {
       if (!isShelfId(id)) throw fail(400, "invalidGenre");
       return discoverShelf(id, getLang());
     }, signal),
+  translate: (lines, to) => call(() => translateLines(lines, to)),
   lyrics: (t, signal) => call(() => lyricsFor(t.title, t.artist, t.duration), signal),
   radio: (id) => call(() => radio(id)),
   genres: () => call(() => genres(getLang())),

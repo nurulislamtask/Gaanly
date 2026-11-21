@@ -373,7 +373,7 @@ export default function Search() {
           />
         )}
 
-        {!linkId && state === "ok" && results && results.length > 1 && /open\.spotify\.com\/(?:intl-[a-z]{2,5}\/)?(album|playlist)\//.test(q) && (
+        {!linkId && state === "ok" && results && results.length > 1 && /(open\.spotify\.com\/(?:intl-[a-z]{2,5}\/)?(album|playlist)\/|music\.apple\.com\/)/.test(q) && (
           <button
             type="button"
             onClick={() =>

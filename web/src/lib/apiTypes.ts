@@ -78,11 +78,18 @@ export interface Lyrics {
   plain: string;
 }
 
+export interface Translated {
+  translation: string[];
+  romanized: string[];
+}
+
 export interface GaanlyApi {
   search(q: string, type: "song" | "video", signal?: AbortSignal): Promise<Track[]>;
   suggest(q: string, signal?: AbortSignal): Promise<string[]>;
   radio(id: string): Promise<Track[]>;
   /** Lyrics from LRCLIB, or null when it has none. */
+  /** Translates lines and gives their Latin-letter spelling. */
+  translate(lines: string[], to: string): Promise<Translated>;
   lyrics(track: Track, signal?: AbortSignal): Promise<Lyrics | null>;
   /** A Home shelf by id ("yt-trending", "sp-global", ...). */
   discoverShelf(id: string, signal?: AbortSignal): Promise<DiscoverShelf>;

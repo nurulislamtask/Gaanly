@@ -1,7 +1,46 @@
+import { CaretLeftIcon, CaretRightIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { desktop } from "../lib/desktop";
 import { cn } from "../lib/format";
 import { selectCurrent, usePlayer } from "../player/player";
 import { Equalizer, LogoMark } from "./Brand";
+
+/** Back/forward plus a search box; Ctrl K (or Cmd K) focuses it from anywhere. */
+function TopSearch() {
+  const navigate = useNavigate();
+  const [q, setQ] = useState("");
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        input.current?.focus();
+        input.current?.select();
+      }
+    };
+    window.addEventListener("keydown", on);
+    return () => window.removeEventListener("keydown", on);
+  }, []);
+  const btn = "app-no-drag grid size-7 place-items-center rounded-full text-fg-3 hover:bg-surface-2 hover:text-fg";
+  return (
+    <div className="ml-auto flex shrink-0 items-center gap-1.5">
+      <button type="button" aria-label="Back" onClick={() => navigate(-1)} className={btn}><CaretLeftIcon size={16} /></button>
+      <button type="button" aria-label="Forward" onClick={() => navigate(1)} className={btn}><CaretRightIcon size={16} /></button>
+      <form
+        className="app-no-drag glass flex h-7 w-56 items-center gap-2 rounded-full px-3 ring-1 ring-line"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (q.trim()) navigate(`/search?q=${encodeURIComponent(q.trim())}`);
+        }}
+      >
+        <MagnifyingGlassIcon size={14} className="text-fg-3" />
+        <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search" className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-fg-3" />
+        <kbd className="text-[10px] text-fg-3">Ctrl K</kbd>
+      </form>
+    </div>
+  );
+}
 
 /**
  * Title bar for the desktop app. The window is frameless; Windows and Linux draw their native buttons over the
@@ -31,6 +70,7 @@ export function TitleBar() {
           </span>
         </span>
       )}
+      <TopSearch />
     </div>
   );
 }

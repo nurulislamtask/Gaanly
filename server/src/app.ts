@@ -4,8 +4,9 @@ import fastifyStatic from "@fastify/static";
 import Fastify from "fastify";
 import { ALBUM_ID, album, ARTIST_ID, artist, GENRE_ID, genre, genreArtists, genres, searchAlbums } from "./browse.js";
 import { config } from "./config.js";
-import { discoverShelf, isShelfId, spotifyLink, spotifyTracks } from "./discover.js";
+import { appleLink, appleTracks, discoverShelf, isShelfId, spotifyLink, spotifyTracks } from "./discover.js";
 import { lyricsFor } from "./lyrics.js";
+import { translateLines } from "./translate.js";
 import * as library from "./library.js";
 import { fileStorage } from "./libraryFile.js";
 import { findVideoFor, radio, search, suggestions } from "./search.js";
@@ -75,6 +76,8 @@ export async function startServer(opts: StartOptions = {}): Promise<RunningServe
     // A pasted Spotify link: its songs, found on YouTube.
     const link = spotifyLink(text);
     if (link) return { tracks: await spotifyTracks(link, langOf(req)) };
+    const apple = appleLink(text);
+    if (apple) return { tracks: await appleTracks(apple, langOf(req)) };
     return { tracks: await search(text, type === "video" ? "video" : "song", langOf(req)) };
   });
 
@@ -95,6 +98,13 @@ export async function startServer(opts: StartOptions = {}): Promise<RunningServe
     const { title, artist, duration } = req.query as { title?: string; artist?: string; duration?: string };
     if (!title?.trim()) throw new HttpError(400, msg("missingTitle"));
     return { lyrics: await lyricsFor(title.slice(0, 200), (artist ?? "").slice(0, 200), Number(duration) || 0) };
+  });
+
+  /** Translation and romanization of lyric lines (see translate.ts). */
+  app.post("/api/translate", async (req) => {
+    const { lines, to } = (req.body ?? {}) as { lines?: unknown; to?: unknown };
+    if (!Array.isArray(lines) || lines.length > 300) throw new HttpError(400, msg("tracksRequired"));
+    return translateLines(lines.map((l) => String(l ?? "")), typeof to === "string" ? to : "en");
   });
 
   app.get("/api/radio/:id", async (req) => ({ tracks: await radio(videoId(req.params)) }));

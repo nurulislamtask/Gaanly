@@ -7,6 +7,7 @@ import { PlayerBar } from "./components/PlayerBar";
 import { Rail } from "./components/Rail";
 import { TitleBar } from "./components/TitleBar";
 import { desktop } from "./lib/desktop";
+import { startSponsorBlock } from "./player/sponsorblock";
 import { EqualizerDialog } from "./components/EqualizerDialog";
 import { DynamicAccent } from "./components/DynamicAccent";
 import { TuneDialog } from "./components/TuneDialog";
@@ -58,6 +59,7 @@ export default function App() {
 
   // New Gaanly releases: checked on start, every few hours and when the app comes back (desktop and phone apps).
   useEffect(() => startAutoUpdateChecks(), []);
+  useEffect(() => startSponsorBlock(), []);
 
   // Check yt-dlp shortly after start and say so once if something needs doing (not on Android: no yt-dlp there).
   useEffect(() => {

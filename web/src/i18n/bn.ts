@@ -148,6 +148,10 @@ export const bn: Messages = merge(en, {
     cardMade: "ছবি তৈরি",
     savePlaylist: "প্লেলিস্ট হিসেবে সেভ",
     playlistSaved: (n: number) => `${n}টি গান প্লেলিস্টে সেভ হয়েছে`,
+    translate: "অনুবাদ",
+    romanize: "রোমান অক্ষরে",
+    translating: "অনুবাদ হচ্ছে…",
+    translateFailed: "এখন অনুবাদ পাওয়া যাচ্ছে না।",
     lyricsSource: "লিরিক্স LRCLIB থেকে",
   },
 } as Deep<Messages>);

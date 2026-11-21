@@ -6,6 +6,7 @@ import {
   type ErrorCode,
   type ImportResult,
   type Lyrics,
+  type Translated,
   type GaanlyApi,
   type Prepared,
   type SystemInfo,
@@ -43,6 +44,8 @@ export const api: GaanlyApi = {
   suggest: (q: string, signal?: AbortSignal) =>
     request<{ suggestions: string[] }>(`/api/suggest?q=${encodeURIComponent(q)}`, { signal }).then((r) => r.suggestions),
   discoverShelf: (id: string, signal?: AbortSignal) => request<DiscoverShelf>(`/api/discover/${encodeURIComponent(id)}`, { signal }),
+  translate: (lines: string[], to: string) =>
+    request<Translated>("/api/translate", { method: "POST", json: { lines, to } }),
   lyrics: (t: Track, signal?: AbortSignal) =>
     request<{ lyrics: Lyrics | null }>(
       `/api/lyrics?title=${encodeURIComponent(t.title)}&artist=${encodeURIComponent(t.artist)}&duration=${Math.round(t.duration)}`,

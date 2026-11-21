@@ -1,8 +1,8 @@
-import { ArrowDownIcon, MinusIcon, PlusIcon, ShareNetworkIcon } from "@phosphor-icons/react";
+import { ArrowDownIcon, GlobeIcon, MinusIcon, PlusIcon, ShareNetworkIcon, TextAaIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
 import { api } from "../lib/api";
-import type { Lyrics } from "../lib/apiTypes";
+import type { Lyrics, Translated } from "../lib/apiTypes";
 import { cn } from "../lib/format";
 import { quoteCard, shareImage } from "../lib/quoteCard";
 import { selectCurrent, usePlayer } from "../player/player";
@@ -25,6 +25,9 @@ export function LyricsView({ className, full = false }: { className?: string; fu
   const [offset, setOffset] = useState(0);
   const [detached, setDetached] = useState(false);
   const [state, setState] = useState<State>("loading");
+  const [showTr, setShowTr] = useState(false);
+  const [showRm, setShowRm] = useState(false);
+  const [extra, setExtra] = useState<(Translated & { id: string }) | "loading" | null>(null);
   const box = useRef<HTMLDivElement>(null);
   const lines = useRef<(HTMLButtonElement | null)[]>([]);
   const programmatic = useRef(false);
@@ -35,6 +38,7 @@ export function LyricsView({ className, full = false }: { className?: string; fu
     setState("loading");
     setOffset(0);
     setDetached(false);
+    setExtra(null);
     const ctl = new AbortController();
     const forId = track.id;
     api.lyrics(track, ctl.signal).then(
@@ -54,6 +58,28 @@ export function LyricsView({ className, full = false }: { className?: string; fu
     if (synced[i]!.t <= position + offset + 0.25) active = i;
     else break;
   }
+
+  const texts = synced.length ? synced.map((l) => l.text) : (lyrics?.plain ?? "").split("\n");
+  useEffect(() => {
+    if ((!showTr && !showRm) || !lyrics || !id) return;
+    if (extra && extra !== "loading" && extra.id === id) return;
+    if (extra === "loading") return;
+    setExtra("loading");
+    const forId = id;
+    api
+      .translate(texts, document.documentElement.lang.slice(0, 2) || "en")
+      .then(
+        (r) => setExtra({ ...r, id: forId }),
+        () => {
+          setExtra(null);
+          setShowTr(false);
+          setShowRm(false);
+          toast(t.listen.translateFailed, "error");
+        },
+      );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showTr, showRm, id, lyrics]);
+  const info = extra && extra !== "loading" && extra.id === id ? extra : null;
 
   const center = (i: number, smooth = true) => {
     const el = lines.current[i];
@@ -82,6 +108,12 @@ export function LyricsView({ className, full = false }: { className?: string; fu
     <div className={cn("relative flex min-h-0 flex-col", className)}>
       <div className="flex items-center gap-2 px-1 pb-2 text-xs text-fg-2">
         <span className="rounded-full bg-black/25 px-3 py-1.5 font-medium ring-1 ring-white/10">{synced.length ? t.listen.synced : t.listen.plainLyrics} · LRCLIB</span>
+        <button type="button" onClick={() => setShowRm(!showRm)} aria-pressed={showRm} title={t.listen.romanize} className={cn("grid size-8 place-items-center rounded-full bg-black/25 ring-1 ring-white/10", showRm && "bg-accent-soft text-accent-text")}>
+          <TextAaIcon size={16} />
+        </button>
+        <button type="button" onClick={() => setShowTr(!showTr)} aria-pressed={showTr} title={t.listen.translate} className={cn("grid size-8 place-items-center rounded-full bg-black/25 ring-1 ring-white/10", showTr && "bg-accent-soft text-accent-text")}>
+          <GlobeIcon size={16} />
+        </button>
         {synced.length > 0 && (
           <span className="ml-auto flex items-center gap-1 rounded-full bg-black/25 p-1 ring-1 ring-white/10" aria-label={t.listen.syncOffset} title={t.listen.syncOffset}>
             <button type="button" onClick={() => setOffset((o) => Math.round((o - 0.5) * 10) / 10)} className="grid size-7 place-items-center rounded-full hover:bg-white/10" aria-label="-0.5s">
@@ -128,6 +160,8 @@ export function LyricsView({ className, full = false }: { className?: string; fu
                 )}
               >
                 {l.text || "♪"}
+                {showRm && info?.romanized[i] && <span className="block text-[0.6em] leading-snug font-medium opacity-70">{info.romanized[i]}</span>}
+                {showTr && info?.translation[i] && <span className="block text-[0.6em] leading-snug font-medium text-accent-text">{info.translation[i]}</span>}
               </button>
             );
           })

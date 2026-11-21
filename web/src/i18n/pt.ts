@@ -87,6 +87,8 @@ export const pt: Messages = {
       edit: "Escolher playlists",
     },
     feed: {
+      forYou: { title: "Feito para você", radio: "Rádio Infinito", radioSub: "Música sem fim com base no que você ouve", play: "Tocar", quick: "Acesso rápido", liked: "Curtidas", discover: "Descobrir", mix: "Mix de descobertas", downloads: "Downloads", sound: "Seu som", picks: "Escolhas rápidas", because: (x: string) => `Porque você ouviu ${x}`,
+        vibes: { energize: "Energia", relax: "Relaxar", focus: "Foco", workout: "Treino", party: "Festa", commute: "Trajeto", sleep: "Dormir", feelGood: "Alegria", romance: "Romance", sad: "Triste" } },
       chips: { all: "Tudo", bangla: "Bengali", hindi: "Hindi", english: "Inglês", urdu: "Urdu", tamil: "Tâmil", telugu: "Telugo", punjabi: "Punjabi", kpop: "K-pop", romantic: "Romântico", chill: "Relax", workout: "Treino", party: "Festa" },
       newSongs: (x: string) => `Novas músicas ${x}`,
       oldSongs: (x: string) => `Clássicos ${x}`,
@@ -269,6 +271,10 @@ export const pt: Messages = {
     eqBassPlus: "+2 dB Grave",
     eqTreblePlus: "+2 dB Agudo",
     play: "Tocar",
+    translate: "Traduzir",
+    romanize: "Romanizar",
+    translating: "Traduzindo…",
+    translateFailed: "A tradução não está disponível agora.",
     lyricsSource: "Letras do LRCLIB",
   },
 

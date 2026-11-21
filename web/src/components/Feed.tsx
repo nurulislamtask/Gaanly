@@ -12,6 +12,7 @@ import { TrackList, TrackListSkeleton } from "./TrackList";
 import { AlbumTile } from "./AlbumTiles";
 import { Artwork } from "./Artwork";
 import { Section } from "./Page";
+import { ForYou } from "./ForYou";
 
 /** Drops what an earlier shelf already showed (same song, or the same cover under another title). */
 function fresh(data: DiscoverShelf, seen: Set<string>): DiscoverShelf {
@@ -268,6 +269,7 @@ export function Feed() {
         </button>
       </div>
 
+      {showHero && <ForYou />}
       {showHero && <Hero onTracks={setHero} />}
 
       {rows.map(({ def, key, view }) => (

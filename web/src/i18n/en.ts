@@ -92,6 +92,8 @@ export const en = {
       edit: "Choose playlists",
     },
     feed: {
+      forYou: { title: "Made for you", radio: "Infinite Radio", radioSub: "Endless music picked from what you play", play: "Play", quick: "Quick access", liked: "Liked Songs", discover: "Discover", mix: "Discover Mix", downloads: "Downloads", sound: "Your Sound", picks: "Quick picks", because: (x: string) => `Because you listened to ${x}`,
+        vibes: { energize: "Energize", relax: "Relax", focus: "Focus", workout: "Workout", party: "Party", commute: "Commute", sleep: "Sleep", feelGood: "Feel good", romance: "Romance", sad: "Sad" } },
       chips: { all: "All", bangla: "Bangla", hindi: "Hindi", english: "English", urdu: "Urdu", tamil: "Tamil", telugu: "Telugu", punjabi: "Punjabi", kpop: "K-pop", romantic: "Romantic", chill: "Chill", workout: "Workout", party: "Party" },
       newSongs: (x: string) => `New ${x} songs`,
       oldSongs: (x: string) => `Old ${x} classics`,
@@ -275,6 +277,10 @@ export const en = {
     eqBassPlus: "+2 dB Bass",
     eqTreblePlus: "+2 dB Treble",
     play: "Play",
+    translate: "Translate",
+    romanize: "Romanize",
+    translating: "Translating…",
+    translateFailed: "Translation isn't available right now.",
     lyricsSource: "Lyrics from LRCLIB",
   },
 

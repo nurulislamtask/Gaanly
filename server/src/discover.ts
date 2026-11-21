@@ -160,3 +160,46 @@ export function discoverShelf(id: ShelfId, lang: Lang): Promise<Shelf> {
     return { id, tracks: (await resolveAll(entries.slice(0, SHELF_SIZE), lang)).slice(0, SHELF_SIZE), albums: [] };
   });
 }
+
+// ---- Apple Music (public playlist and album pages: the songs are listed in the page's structured data)
+
+const APPLE_LINK = /music\.apple\.com\/[a-z]{2}\/(playlist|album)\/[^/\s?]+\/([A-Za-z0-9._-]+)/;
+
+export function appleLink(text: string): string | null {
+  const m = /https?:\/\/music\.apple\.com\/[a-z]{2}\/(?:playlist|album)\/[^\s]+/.exec(text);
+  return m && APPLE_LINK.test(m[0]) ? m[0].split("#")[0]! : null;
+}
+
+const appleEntries = memo<SpotifyEntry[]>(3 * HOUR, 60);
+
+function walk(node: unknown, out: SpotifyEntry[]) {
+  if (Array.isArray(node)) return node.forEach((n) => walk(n, out));
+  if (!node || typeof node !== "object") return;
+  const o = node as Record<string, unknown>;
+  if (o["@type"] === "MusicRecording" && typeof o.name === "string") {
+    const by = o.byArtist;
+    const artist = Array.isArray(by) ? by.map((a: any) => a?.name).filter(Boolean).join(", ") : String((by as any)?.name ?? "");
+    out.push({ title: o.name, artist });
+  }
+  for (const v of Object.values(o)) if (v && typeof v === "object") walk(v, out);
+}
+
+/** The songs behind a pasted Apple Music playlist or album link, as YouTube tracks ready to play. */
+export async function appleTracks(url: string, lang: Lang): Promise<Track[]> {
+  const entries = await appleEntries(url, async () => {
+    const res = await (config.fetch ?? fetch)(url, { headers: { "user-agent": EMBED_AGENT, "accept-language": "en-US,en;q=0.9" } });
+    if (!res.ok) throw new Error(`Apple Music answered ${res.status}`);
+    const html = await res.text();
+    const found: SpotifyEntry[] = [];
+    for (const m of html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)) {
+      try {
+        walk(JSON.parse(m[1]!), found);
+      } catch {
+        /* not the block we want */
+      }
+    }
+    if (!found.length) throw new Error("Apple Music's page changed: no songs found");
+    return found;
+  });
+  return resolveAll(entries.slice(0, 50), lang);
+}

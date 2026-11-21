@@ -1,3 +1,4 @@
+import { setSponsorBlock, sponsorBlockOn } from "../player/sponsorblock";
 import { CheckIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { useT } from "../i18n";
@@ -129,6 +130,7 @@ export function TuneDialog() {
 export function HomeSettings() {
   const t = useT();
   const prefs = useHomePrefs();
+  const [sb, setSb] = useState(sponsorBlockOn);
   const summary = [...prefs.languages.map((l) => t.home.feed.chips[l as keyof typeof t.home.feed.chips] ?? l), ...prefs.artists].join(", ");
   return (
     <section className="flex flex-col gap-2">
@@ -143,6 +145,20 @@ export function HomeSettings() {
           <span className="block truncate text-xs text-fg-2">{summary ? t.home.tune.filtering(summary) : t.home.tune.languagesHint}</span>
         </span>
         <span className="shrink-0 text-sm font-medium text-accent-text">{t.home.tune.edit2}</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setSponsorBlock(!sb);
+          setSb(!sb);
+        }}
+        className="flex items-center justify-between gap-3 rounded-[16px] bg-surface-1 px-4 py-3 text-left ring-1 ring-line hover:bg-surface-2"
+      >
+        <span className="min-w-0">
+          <span className="block text-sm font-medium">SponsorBlock</span>
+          <span className="block text-xs text-fg-2">Skip sponsor and intro parts in music videos</span>
+        </span>
+        <span className="shrink-0 text-sm font-medium text-accent-text">{sb ? "On" : "Off"}</span>
       </button>
     </section>
   );
