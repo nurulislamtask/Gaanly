@@ -1,0 +1,45 @@
+# Opens the Android build of the web app in a headless browser and reports console errors plus a screenshot.
+name: Smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @gaanly/web exec vite build --mode native
+      - run: |
+          cd web/dist-native && (python3 -m http.server 4173 >/dev/null 2>&1 &)
+          cd ../.. && mkdir -p /tmp/pw && cd /tmp/pw && npm init -y >/dev/null && npm i playwright >/dev/null && npx playwright install --with-deps chromium >/dev/null
+          cat > run.js <<'EOF'
+          const { chromium } = require("playwright");
+          (async () => {
+            const b = await chromium.launch();
+            const p = await (await b.newContext({ viewport: { width: 412, height: 915 }, deviceScaleFactor: 2 })).newPage();
+            p.on("console", (m) => console.log("CONSOLE", m.type(), m.text()));
+            p.on("pageerror", (e) => console.log("PAGEERROR", e.stack || e.message));
+            await p.goto("http://localhost:4173/");
+            await p.waitForTimeout(8000);
+            console.log("ROOT CHILDREN", await p.evaluate(() => document.getElementById("root").childElementCount));
+            console.log("TEXT", (await p.evaluate(() => document.body.innerText)).slice(0, 600));
+            await p.screenshot({ path: "/tmp/pw/home.png" });
+            await b.close();
+          })();
+          EOF
+          node run.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke
+          path: /tmp/pw/home.png
