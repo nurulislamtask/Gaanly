@@ -245,6 +245,17 @@ export const pt: Messages = {
     downloadsTitle: "Downloads",
     downloadsEmpty: "Nada baixado ainda. Use Baixar no menu de uma música ou no player.",
     downloadsUnsupported: "Downloads ainda não estão disponíveis no iPhone.",
+    equalizer: "Equalizador",
+    eqOn: "Equalizador ligado",
+    eqUnsupported: "Este aparelho não consegue aplicar o equalizador agora. Toque uma música primeiro ou use o app de computador.",
+    eqPresets: { flat: "Plano", bass: "Grave", treble: "Agudo", vocal: "Vocal", rock: "Rock", pop: "Pop", jazz: "Jazz", electronic: "Eletrônica", hiphop: "Hip-hop", acoustic: "Acústico", custom: "Personalizado" },
+    pitchFollows: "Tom acompanha a velocidade",
+    pitchKept: "Tom mantido",
+    shareLine: "Compartilhar este verso",
+    shareCard: "Compartilhar como imagem",
+    cardMade: "Imagem pronta",
+    savePlaylist: "Salvar como playlist",
+    playlistSaved: (n: number) => `${n} músicas salvas como playlist`,
     lyricsSource: "Letras do LRCLIB",
   },
 
@@ -421,7 +432,9 @@ export const pt: Messages = {
 
   customize: {
     palette: "Tema",
-    palettes: { ocean: "Oceano", midnight: "Meia-noite (AMOLED)", graphite: "Grafite", plum: "Ameixa", forest: "Floresta", sunset: "Pôr do sol" },
+    dynamic: "Cores da capa",
+    dynamicBody: "A cor de destaque segue a música que está tocando.",
+    palettes: { ocean: "Oceano", midnight: "Meia-noite (AMOLED)", graphite: "Grafite", plum: "Ameixa", forest: "Floresta", sunset: "Pôr do sol", crimson: "Carmim", mocha: "Mocha", slate: "Ardósia" },
     accent: "Cor de destaque",
     customColor: "Cor personalizada",
     colors: {

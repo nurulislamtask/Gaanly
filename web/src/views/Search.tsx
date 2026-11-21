@@ -22,6 +22,8 @@ import { useT } from "../i18n";
 import { cn } from "../lib/format";
 import { paths } from "../lib/routes";
 import type { AlbumCard, Track } from "../lib/types";
+import { useLibrary } from "../stores/library";
+import { useUi } from "../stores/ui";
 import { usePlayer } from "../player/player";
 import { parseList } from "./BatchSearch";
 
@@ -66,6 +68,7 @@ export default function Search() {
   const q = params.get("q") ?? "";
   const kind: Kind = params.get("type") === "videos" ? "video" : params.get("type") === "albums" ? "album" : "song";
   const t = useT();
+  const createPlaylist = useLibrary((s) => s.createPlaylist);
   const [text, setText] = useState(q);
   const [results, setResults] = useState<Track[] | null>(null);
   const [albums, setAlbums] = useState<AlbumCard[] | null>(null);
@@ -370,6 +373,19 @@ export default function Search() {
           />
         )}
 
+        {!linkId && state === "ok" && results && results.length > 1 && /open\.spotify\.com\/(?:intl-[a-z]{2,5}\/)?(album|playlist)\//.test(q) && (
+          <button
+            type="button"
+            onClick={() =>
+              void createPlaylist(q.includes("/album/") ? "Spotify album" : "Spotify playlist", results).then((p) => {
+                if (p) useUi.getState().toast(t.listen.playlistSaved(results.length));
+              })
+            }
+            className="mx-4 mb-3 flex h-10 items-center gap-2 rounded-full bg-accent px-5 text-sm font-semibold text-accent-ink active:scale-95 md:mx-6"
+          >
+            {t.listen.savePlaylist}
+          </button>
+        )}
         {!linkId && state === "ok" && results && results.length > 0 && <TrackList tracks={results} showAlbum={kind === "song"} />}
 
         {!linkId && state === "idle" && (

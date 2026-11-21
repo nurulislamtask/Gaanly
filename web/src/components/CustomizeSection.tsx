@@ -111,6 +111,7 @@ export function LayoutSection() {
         />
         <SwitchRow label={t.customize.albumColumn} checked={a.albumColumn} onChange={(v) => a.set({ albumColumn: v })} />
         <SwitchRow label={t.customize.glass} body={t.customize.glassBody} checked={a.glass} onChange={(v) => a.set({ glass: v })} />
+        <SwitchRow label={t.customize.dynamic} body={t.customize.dynamicBody} checked={a.dynamic} onChange={(v) => a.set({ dynamic: v })} />
         <SwitchRow label={t.customize.texture} checked={a.texture} onChange={(v) => a.set({ texture: v })} />
       </div>
 
@@ -155,6 +156,9 @@ const SWATCH: Record<string, [string, string, string]> = {
   plum: ["#170b22", "#2a1639", "#472a60"],
   forest: ["#08170f", "#122b1d", "#234c34"],
   sunset: ["#1d0f0c", "#361b16", "#5c3025"],
+  crimson: ["#1a0a0d", "#31141b", "#56242f"],
+  mocha: ["#17110d", "#2b211a", "#4a392d"],
+  slate: ["#0e1218", "#1c2431", "#333f52"],
 };
 
 /** Theme cards: the dark surface colours, each shown as three bars. */

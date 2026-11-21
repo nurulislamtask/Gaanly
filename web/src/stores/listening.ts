@@ -17,7 +17,7 @@ const RECIPE: Record<Effect, { rate: number | null; bass: number; reverb: number
 };
 export const FADES = [0, 3, 6] as const;
 
-export const SPEEDS = [0.75, 1, 1.25, 1.5, 2] as const;
+export const SPEEDS = [0.5, 0.75, 0.9, 1, 1.1, 1.25, 1.5, 2] as const;
 /** Minutes, or "end" to stop when the current song finishes. */
 export const SLEEP_OPTIONS = [15, 30, 45, 60, "end"] as const;
 export type Sleep = (typeof SLEEP_OPTIONS)[number];
@@ -35,6 +35,9 @@ function savedSpeed(): number {
 
 interface ListeningState {
   speed: number;
+  /** With a changed speed: keep the voice's pitch (true) or let it follow the speed ("chipmunk" / "slowed"). */
+  keepPitch: boolean;
+  togglePitch: () => void;
   effect: Effect;
   /** Seconds of fade at the start and end of each song (0 = off). */
   fade: number;
@@ -98,6 +101,12 @@ export const useListening = create<ListeningState>((set, get) => {
 
   return {
     speed: initial,
+    keepPitch: true,
+    togglePitch: () => {
+      const keepPitch = !get().keepPitch;
+      set({ keepPitch });
+      if (get().effect === "off") applyPlaybackSpeed(get().speed, keepPitch);
+    },
     effect: "off",
     fade: (() => {
       try {
@@ -135,7 +144,7 @@ export const useListening = create<ListeningState>((set, get) => {
     sleepAt: null,
     sleepTrack: null,
     setSpeed: (v) => {
-      if (get().effect === "off") applyPlaybackSpeed(v);
+      if (get().effect === "off") applyPlaybackSpeed(v, get().keepPitch);
       try {
         localStorage.setItem(KEY, String(v));
       } catch {

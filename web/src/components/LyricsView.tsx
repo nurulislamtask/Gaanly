@@ -1,8 +1,11 @@
+import { ShareNetworkIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
 import { api } from "../lib/api";
 import type { Lyrics } from "../lib/apiTypes";
 import { cn } from "../lib/format";
+import { quoteCard, shareImage } from "../lib/quoteCard";
+import { useUi } from "../stores/ui";
 import { selectCurrent, usePlayer } from "../player/player";
 
 type State = { id: string; lyrics: Lyrics | null } | "loading";
@@ -14,6 +17,8 @@ export function LyricsView({ className }: { className?: string }) {
   const position = usePlayer((s) => s.position);
   const seek = usePlayer((s) => s.seek);
   const [state, setState] = useState<State>("loading");
+  const toast = useUi((s) => s.toast);
+  const [picked, setPicked] = useState<number | null>(null);
   const box = useRef<HTMLDivElement>(null);
   const lines = useRef<(HTMLButtonElement | null)[]>([]);
   const id = track?.id;
@@ -31,6 +36,7 @@ export function LyricsView({ className }: { className?: string }) {
     // Only a different song needs new lyrics.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+  useEffect(() => setPicked(null), [id]);
 
   const lyrics = state !== "loading" && state.id === id ? state.lyrics : null;
   const synced = lyrics?.synced ?? [];
@@ -67,7 +73,10 @@ export function LyricsView({ className }: { className?: string }) {
                   lines.current[i] = el;
                 }}
                 type="button"
-                onClick={() => seek(l.t)}
+                onClick={() => {
+                  setPicked(i);
+                  seek(l.t);
+                }}
                 style={{ filter: d === 0 ? "none" : `blur(${Math.min(3.5, d * 0.9)}px)`, opacity: d === 0 ? 1 : Math.max(0.28, 0.75 - d * 0.14) }}
                 className={cn(
                   "block w-full py-2 text-balance transition-[filter,opacity,transform,color] duration-500",
@@ -79,9 +88,36 @@ export function LyricsView({ className }: { className?: string }) {
             );
           })
         ) : (
-          <p className="text-[17px] leading-8 font-medium whitespace-pre-line text-fg">{lyrics.plain}</p>
+          lyrics.plain.split("\n").map((l, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setPicked(i)}
+              className={cn("block w-full py-1 text-[17px] leading-7 font-medium", picked === i ? "text-accent-text" : "text-fg")}
+            >
+              {l || "\u00a0"}
+            </button>
+          ))
         )}
       </div>
+      {(() => {
+        const line = synced.length ? synced[picked ?? Math.max(active, 0)]?.text : lyrics.plain.split("\n")[picked ?? -1];
+        if (!line?.trim() || !track) return null;
+        return (
+          <button
+            type="button"
+            onClick={() =>
+              quoteCard(line, track).then(
+                (blob) => shareImage(blob, `${track.title}`.slice(0, 40)).then(() => toast(t.listen.cardMade)),
+                () => {},
+              )
+            }
+            className="mx-auto mt-2 flex h-10 items-center gap-2 rounded-full bg-accent-soft px-5 text-sm font-medium text-accent-text active:scale-95"
+          >
+            <ShareNetworkIcon size={17} /> {t.listen.shareCard}
+          </button>
+        );
+      })()}
       <p className="px-3 pt-2 text-center text-[11px] text-fg-3">{t.listen.lyricsSource}</p>
     </div>
   );

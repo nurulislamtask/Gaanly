@@ -83,6 +83,19 @@
   --aura-1: rgb(251 124 92 / 0.22); --aura-2: rgb(251 191 36 / 0.14);
 }
 
+:root[data-palette="crimson"]:not([data-theme="light"]) {
+  --bg: #1a0a0d; --surface-1: #260f14; --surface-2: #31141b; --surface-3: #421b25; --surface-4: #56242f;
+  --aura-1: rgb(244 63 94 / 0.22); --aura-2: rgb(251 146 60 / 0.12);
+}
+:root[data-palette="mocha"]:not([data-theme="light"]) {
+  --bg: #17110d; --surface-1: #211914; --surface-2: #2b211a; --surface-3: #392c23; --surface-4: #4a392d;
+  --aura-1: rgb(217 163 108 / 0.2); --aura-2: rgb(251 191 36 / 0.1);
+}
+:root[data-palette="slate"]:not([data-theme="light"]) {
+  --bg: #0e1218; --surface-1: #151b24; --surface-2: #1c2431; --surface-3: #26303f; --surface-4: #333f52;
+  --aura-1: rgb(96 165 250 / 0.16); --aura-2: rgb(148 163 184 / 0.1);
+}
+
 /* Glass: panels are frosted and let the aurora behind them show through. Settings > Layout > Glass turns it off
    (solid panels, no blur): lighter on slow phones. */
 :root {

@@ -251,6 +251,17 @@ export const en = {
     downloadsTitle: "Downloads",
     downloadsEmpty: "Nothing downloaded yet. Use Download in a song's menu or the player.",
     downloadsUnsupported: "Downloads aren't available on iPhone yet.",
+    equalizer: "Equalizer",
+    eqOn: "Equalizer on",
+    eqUnsupported: "This device can't apply the equalizer right now. Start a song first, or try the desktop app.",
+    eqPresets: { flat: "Flat", bass: "Bass boost", treble: "Treble", vocal: "Vocal", rock: "Rock", pop: "Pop", jazz: "Jazz", electronic: "Electronic", hiphop: "Hip-hop", acoustic: "Acoustic", custom: "Custom" },
+    pitchFollows: "Pitch follows speed",
+    pitchKept: "Pitch kept",
+    shareLine: "Share this line",
+    shareCard: "Share as picture",
+    cardMade: "Picture ready",
+    savePlaylist: "Save as playlist",
+    playlistSaved: (n: number) => `Saved ${n} songs as a playlist`,
     lyricsSource: "Lyrics from LRCLIB",
   },
 
@@ -427,7 +438,9 @@ export const en = {
 
   customize: {
     palette: "Theme",
-    palettes: { ocean: "Ocean", midnight: "Midnight (AMOLED)", graphite: "Graphite", plum: "Plum", forest: "Forest", sunset: "Sunset" },
+    dynamic: "Colours from the cover",
+    dynamicBody: "The accent colour follows the song that is playing.",
+    palettes: { ocean: "Ocean", midnight: "Midnight (AMOLED)", graphite: "Graphite", plum: "Plum", forest: "Forest", sunset: "Sunset", crimson: "Crimson", mocha: "Mocha", slate: "Slate" },
     accent: "Accent color",
     customColor: "Custom color",
     colors: {

@@ -7,6 +7,8 @@ import { PlayerBar } from "./components/PlayerBar";
 import { Rail } from "./components/Rail";
 import { TitleBar } from "./components/TitleBar";
 import { desktop } from "./lib/desktop";
+import { EqualizerDialog } from "./components/EqualizerDialog";
+import { DynamicAccent } from "./components/DynamicAccent";
 import { TuneDialog } from "./components/TuneDialog";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { Toasts } from "./components/Toasts";
@@ -165,6 +167,8 @@ export default function App() {
       <ShortcutsDialog />
       <SettingsDialog />
       <TuneDialog />
+      <DynamicAccent />
+      <EqualizerDialog />
       <UpdateBanner />
       <Toasts />
     </div>

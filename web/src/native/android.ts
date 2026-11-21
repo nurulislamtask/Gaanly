@@ -1,21 +1,26 @@
 import { App } from "@capacitor/app";
 import { Capacitor, registerPlugin, SystemBars, SystemBarsStyle } from "@capacitor/core";
 import { registerNativeUpdater } from "../lib/update";
+import { nativeEq } from "../stores/equalizer";
 import { installTvMode } from "../tv/tvMode";
 
 /** GaanlyDevicePlugin.java: what kind of device this is, and the in-app updater. */
 interface DevicePlugin {
   info(): Promise<{ tv: boolean }>;
   installUpdate(options: { url: string }): Promise<void>;
+  setEqualizer(options: { gains: number[] }): Promise<{ supported: boolean }>;
   addListener(event: "updateProgress", fn: (e: { percent: number }) => void): Promise<{ remove: () => Promise<void> }>;
 }
 const Device = registerPlugin<DevicePlugin>("GaanlyDevice", {
   web: () => ({
     info: async () => ({ tv: false }),
     installUpdate: async () => {},
+    setEqualizer: async () => ({ supported: false }),
     addListener: async () => ({ remove: async () => {} }),
   }),
 });
+
+nativeEq.set = async (gains) => (await Device.setEqualizer({ gains })).supported;
 
 // How the app fits into Android itself: Android TV, the Back button and the system bars.
 if (Capacitor.isNativePlatform()) {

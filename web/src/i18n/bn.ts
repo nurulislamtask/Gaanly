@@ -109,7 +109,9 @@ export const bn: Messages = merge(en, {
   },
   customize: {
     palette: "থিম",
-    palettes: { ocean: "সমুদ্র", midnight: "মধ্যরাত (AMOLED)", graphite: "গ্রাফাইট", plum: "বেগুনি", forest: "বন", sunset: "সূর্যাস্ত" },
+    dynamic: "কভার থেকে রং",
+    dynamicBody: "চলতি গানের কভার থেকে অ্যাকসেন্ট রং আসবে।",
+    palettes: { ocean: "সমুদ্র", midnight: "মধ্যরাত (AMOLED)", graphite: "গ্রাফাইট", plum: "বেগুনি", forest: "বন", sunset: "সূর্যাস্ত", crimson: "ক্রিমসন", mocha: "মোকা", slate: "স্লেট" },
   },
   listen: {
     lyrics: "লিরিক্স",
@@ -135,6 +137,17 @@ export const bn: Messages = merge(en, {
     removeDownload: "ডাউনলোড মুছুন",
     downloadsTitle: "ডাউনলোড",
     downloadsEmpty: "এখনো কিছু ডাউনলোড হয়নি। গানের মেনু বা প্লেয়ার থেকে ডাউনলোড চাপুন।",
+    equalizer: "ইকুয়ালাইজার",
+    eqOn: "ইকুয়ালাইজার চালু",
+    eqUnsupported: "এই ডিভাইসে এখন ইকুয়ালাইজার কাজ করছে না। আগে একটি গান চালান, অথবা ডেস্কটপ অ্যাপ ব্যবহার করুন।",
+    eqPresets: { flat: "ফ্ল্যাট", bass: "বেস বুস্ট", treble: "ট্রেবল", vocal: "ভোকাল", rock: "রক", pop: "পপ", jazz: "জ্যাজ", electronic: "ইলেকট্রনিক", hiphop: "হিপ-হপ", acoustic: "অ্যাকোস্টিক", custom: "কাস্টম" },
+    pitchFollows: "গতির সাথে সুর বদলায়",
+    pitchKept: "সুর ঠিক থাকে",
+    shareLine: "এই লাইন শেয়ার",
+    shareCard: "ছবি হিসেবে শেয়ার",
+    cardMade: "ছবি তৈরি",
+    savePlaylist: "প্লেলিস্ট হিসেবে সেভ",
+    playlistSaved: (n: number) => `${n}টি গান প্লেলিস্টে সেভ হয়েছে`,
     lyricsSource: "লিরিক্স LRCLIB থেকে",
   },
 } as Deep<Messages>);

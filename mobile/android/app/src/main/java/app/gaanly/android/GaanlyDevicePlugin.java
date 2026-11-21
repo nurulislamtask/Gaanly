@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
+import android.media.audiofx.Equalizer;
 import android.provider.Settings;
 import androidx.core.content.FileProvider;
 import com.getcapacitor.JSObject;
@@ -39,6 +40,50 @@ public class GaanlyDevicePlugin extends Plugin {
             context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
         JSObject result = new JSObject();
         result.put("tv", tv);
+        call.resolve(result);
+    }
+
+    private Equalizer equalizer;
+
+    /**
+     * The phone's equaliser on the whole audio output. The app sends ten gains (dB, 31 Hz to 16 kHz); the phone usually
+     * has five bands, so each takes the average of the app bands closest to its centre frequency.
+     */
+    @PluginMethod
+    public void setEqualizer(PluginCall call) {
+        JSObject result = new JSObject();
+        try {
+            org.json.JSONArray gains = call.getArray("gains");
+            if (equalizer == null) {
+                equalizer = new Equalizer(0, 0);
+            }
+            double[] hz = { 31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000 };
+            short[] range = equalizer.getBandLevelRange();
+            boolean flat = true;
+            for (int i = 0; i < gains.length(); i++) {
+                if (gains.getDouble(i) != 0) flat = false;
+            }
+            equalizer.setEnabled(!flat);
+            for (short band = 0; band < equalizer.getNumberOfBands(); band++) {
+                double centre = equalizer.getCenterFreq(band) / 1000.0;
+                double sum = 0;
+                int n = 0;
+                for (int i = 0; i < hz.length; i++) {
+                    if (Math.abs(Math.log(hz[i] / centre)) < 0.85) {
+                        sum += gains.getDouble(i);
+                        n++;
+                    }
+                }
+                double db = n == 0 ? 0 : sum / n;
+                int level = (int) Math.round(db * 100);
+                level = Math.max(range[0], Math.min(range[1], level));
+                equalizer.setBandLevel(band, (short) level);
+            }
+            result.put("supported", true);
+        } catch (Throwable e) {
+            equalizer = null;
+            result.put("supported", false);
+        }
         call.resolve(result);
     }
 

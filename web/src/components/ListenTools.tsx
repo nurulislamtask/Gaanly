@@ -1,8 +1,9 @@
-import { CheckIcon, DownloadSimpleIcon, GaugeIcon, MoonStarsIcon, SlidersIcon, WaveformIcon } from "@phosphor-icons/react";
+import { CheckIcon, DownloadSimpleIcon, GaugeIcon, MoonStarsIcon, SlidersIcon, SlidersHorizontalIcon, WaveformIcon } from "@phosphor-icons/react";
 import { useT } from "../i18n";
 import { cn } from "../lib/format";
 import { offlineSupported, useOffline } from "../lib/offline";
 import { selectCurrent, usePlayer } from "../player/player";
+import { useEqualizer } from "../stores/equalizer";
 import { SLEEP_OPTIONS, useListening } from "../stores/listening";
 import { useUi } from "../stores/ui";
 
@@ -17,6 +18,10 @@ export function ListenTools({ className }: { className?: string }) {
   const t = useT();
   const speed = useListening((s) => s.speed);
   const cycleSpeed = useListening((s) => s.cycleSpeed);
+  const keepPitch = useListening((s) => s.keepPitch);
+  const togglePitch = useListening((s) => s.togglePitch);
+  const eqOn = useEqualizer((s) => s.enabled);
+  const openEq = useEqualizer((s) => s.setOpen);
   const sleep = useListening((s) => s.sleep);
   const setSleep = useListening((s) => s.setSleep);
   const toast = useUi((s) => s.toast);
@@ -42,6 +47,14 @@ export function ListenTools({ className }: { className?: string }) {
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
       <button type="button" onClick={cycleSpeed} aria-label={t.listen.speedX(String(speed))} title={t.listen.speed} className={pill(speed !== 1)}>
         <GaugeIcon size={16} /> {speed}x
+      </button>
+      {speed !== 1 && (
+        <button type="button" onClick={togglePitch} className={pill(!keepPitch)}>
+          {keepPitch ? t.listen.pitchKept : t.listen.pitchFollows}
+        </button>
+      )}
+      <button type="button" onClick={() => openEq(true)} className={pill(eqOn)}>
+        <SlidersHorizontalIcon size={16} /> {t.listen.equalizer}
       </button>
       <button type="button" onClick={nextSleep} aria-label={sleep === null ? t.listen.sleepOff : t.listen.sleepSet(label(sleep))} title={t.listen.sleep} className={pill(sleep !== null)}>
         <MoonStarsIcon size={16} /> {sleep === null ? t.listen.sleep : label(sleep)}

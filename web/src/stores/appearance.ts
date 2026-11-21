@@ -11,17 +11,20 @@ export interface Appearance {
   albumColumn: boolean;
   texture: boolean;
   glass: boolean;
+  /** Take the accent colour from the playing song's cover. */
+  dynamic: boolean;
   homeShortcuts: boolean;
   homeRecent: boolean;
   homeFavorites: boolean;
 }
 
-export const PALETTES = ["ocean", "midnight", "graphite", "plum", "forest", "sunset"] as const;
+export const PALETTES = ["ocean", "midnight", "graphite", "plum", "forest", "sunset", "crimson", "mocha", "slate"] as const;
 export type Palette = (typeof PALETTES)[number];
 
 export const DEFAULT_APPEARANCE: Appearance = {
   accent: DEFAULT_ACCENT,
   palette: "ocean",
+  dynamic: false,
   sidebarPlaylists: true,
   compactSidebar: false,
   albumColumn: true,
