@@ -80,6 +80,13 @@ async function downloadOnAndroid(url: string, path: string) {
   }
 }
 
+/** Android's own downloader (GaanlyDevicePlugin.downloadAudio): straight to disk, with the exact error on failure. */
+async function downloadWithPlugin(url: string, path: string) {
+  const plugin = (Capacitor as unknown as { Plugins?: Record<string, { downloadAudio?: (o: object) => Promise<{ bytes: number }> }> }).Plugins?.GaanlyDevice;
+  if (!plugin?.downloadAudio) throw new Error("native downloader missing");
+  await plugin.downloadAudio({ url, path, userAgent: navigator.userAgent });
+}
+
 interface OfflineState {
   tracks: Track[];
   /** Song ids being downloaded right now. */
@@ -108,7 +115,14 @@ export const useOffline = create<OfflineState>((set, get) => {
       try {
         const url = await streamSource(track.id, "audio", "sd");
         if (native) {
-          await downloadOnAndroid(url, filePath(track.id));
+          try {
+            await downloadWithPlugin(url, filePath(track.id));
+          } catch (first) {
+            // The in-app route as a second chance; if both fail, say what each one said.
+            await downloadOnAndroid(url, filePath(track.id)).catch((second: Error) => {
+              throw new Error(`${(first as Error).message}; ${second.message}`);
+            });
+          }
         } else {
           const res = await fetch(url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);

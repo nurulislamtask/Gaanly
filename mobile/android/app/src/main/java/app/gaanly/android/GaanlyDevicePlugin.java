@@ -87,6 +87,76 @@ public class GaanlyDevicePlugin extends Plugin {
         call.resolve(result);
     }
 
+
+    /**
+     * downloadAudio({ url, path, userAgent }): saves a YouTube audio stream into the app's files folder, in ranged
+     * pieces the way a player asks for it, straight to disk. Resolves { bytes }; rejects with the exact failure.
+     */
+    @PluginMethod
+    public void downloadAudio(PluginCall call) {
+        final String link = call.getString("url");
+        final String path = call.getString("path");
+        final String agent = call.getString("userAgent", "Mozilla/5.0");
+        if (link == null || path == null || path.contains("..")) {
+            call.reject("Bad download request.");
+            return;
+        }
+        new Thread(() -> {
+            File out = new File(getContext().getFilesDir(), path);
+            try {
+                File dir = out.getParentFile();
+                if (dir != null) dir.mkdirs();
+                android.net.Uri base = android.net.Uri.parse(link);
+                String clen = base.getQueryParameter("clen");
+                long total = clen == null ? 0 : Long.parseLong(clen);
+                final int chunk = 1024 * 1024;
+                long pos = 0;
+                try (OutputStream os = new FileOutputStream(out)) {
+                    byte[] buf = new byte[32 * 1024];
+                    while (true) {
+                        long end = (total > 0 ? Math.min(pos + chunk, total) : pos + chunk) - 1;
+                        String part = base.buildUpon().clearQuery().build().toString();
+                        StringBuilder q = new StringBuilder();
+                        for (String name : base.getQueryParameterNames()) {
+                            if (name.equals("range")) continue;
+                            for (String v : base.getQueryParameters(name)) {
+                                q.append(q.length() == 0 ? "?" : "&").append(name).append("=").append(android.net.Uri.encode(v));
+                            }
+                        }
+                        q.append(q.length() == 0 ? "?" : "&").append("range=").append(pos).append("-").append(end);
+                        HttpURLConnection c = (HttpURLConnection) new URL(part + q).openConnection();
+                        c.setConnectTimeout(20000);
+                        c.setReadTimeout(30000);
+                        c.setRequestProperty("User-Agent", agent);
+                        c.setRequestProperty("Range", "bytes=" + pos + "-" + end);
+                        int code = c.getResponseCode();
+                        if (code >= 400) throw new Exception("HTTP " + code);
+                        long got = 0;
+                        try (InputStream in = c.getInputStream()) {
+                            int n;
+                            while ((n = in.read(buf)) > 0) {
+                                os.write(buf, 0, n);
+                                got += n;
+                            }
+                        } finally {
+                            c.disconnect();
+                        }
+                        if (got == 0) break;
+                        pos += got;
+                        if (total > 0 ? pos >= total : got < chunk) break;
+                    }
+                }
+                if (pos == 0) throw new Exception("empty response");
+                JSObject r = new JSObject();
+                r.put("bytes", pos);
+                call.resolve(r);
+            } catch (Throwable e) {
+                out.delete();
+                call.reject(e.getClass().getSimpleName() + ": " + e.getMessage());
+            }
+        }).start();
+    }
+
     /** Only Gaanly's own GitHub downloads are accepted (the web side checks the repository path too). */
     private static boolean trusted(URL url) {
         String host = url.getHost();

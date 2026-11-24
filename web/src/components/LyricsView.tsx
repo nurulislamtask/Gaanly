@@ -1,4 +1,4 @@
-import { ArrowDownIcon, GlobeIcon, MinusIcon, PlusIcon, ShareNetworkIcon, TextAaIcon } from "@phosphor-icons/react";
+import { ArrowDownIcon, MinusIcon, PlusIcon, ShareNetworkIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
 import { api, saveFile } from "../lib/api";
@@ -7,6 +7,23 @@ import { cn } from "../lib/format";
 import { quoteCard, shareImage } from "../lib/quoteCard";
 import { selectCurrent, usePlayer } from "../player/player";
 import { useUi } from "../stores/ui";
+
+interface Views {
+  original: boolean;
+  banglish: boolean;
+  english: boolean;
+  bangla: boolean;
+}
+const VIEWS_KEY = "gaanly:lyricViews";
+function readViews(): Views {
+  try {
+    const v = JSON.parse(localStorage.getItem(VIEWS_KEY) ?? "null") as Partial<Views> | null;
+    if (v) return { original: v.original ?? true, banglish: !!v.banglish, english: !!v.english, bangla: !!v.bangla };
+  } catch {
+    /* ignore */
+  }
+  return { original: true, banglish: false, english: false, bangla: false };
+}
 
 type State = { id: string; lyrics: Lyrics | null } | "loading";
 
@@ -25,9 +42,8 @@ export function LyricsView({ className, full = false }: { className?: string; fu
   const [offset, setOffset] = useState(0);
   const [detached, setDetached] = useState(false);
   const [state, setState] = useState<State>("loading");
-  const [showTr, setShowTr] = useState(false);
-  const [showRm, setShowRm] = useState(false);
-  const [extra, setExtra] = useState<(Translated & { id: string }) | "loading" | null>(null);
+  const [view, setView] = useState<Views>(readViews);
+  const [extra, setExtra] = useState<Record<string, Translated | "loading">>({});
   const box = useRef<HTMLDivElement>(null);
   const lines = useRef<(HTMLButtonElement | null)[]>([]);
   const programmatic = useRef(false);
@@ -38,7 +54,7 @@ export function LyricsView({ className, full = false }: { className?: string; fu
     setState("loading");
     setOffset(0);
     setDetached(false);
-    setExtra(null);
+    setExtra({});
     const ctl = new AbortController();
     const forId = track.id;
     api.lyrics(track, ctl.signal).then(
@@ -60,26 +76,43 @@ export function LyricsView({ className, full = false }: { className?: string; fu
   }
 
   const texts = synced.length ? synced.map((l) => l.text) : (lyrics?.plain ?? "").split("\n");
+  const wants = [...new Set([view.banglish || view.english ? "en" : "", view.bangla ? "bn" : ""].filter(Boolean))];
   useEffect(() => {
-    if ((!showTr && !showRm) || !lyrics || !id) return;
-    if (extra && extra !== "loading" && extra.id === id) return;
-    if (extra === "loading") return;
-    setExtra("loading");
-    const forId = id;
-    api
-      .translate(texts, document.documentElement.lang.slice(0, 2) || "en")
-      .then(
-        (r) => setExtra({ ...r, id: forId }),
+    if (!lyrics || !id) return;
+    for (const lang of wants) {
+      const key = `${id}|${lang}`;
+      if (extra[key]) continue;
+      setExtra((e) => ({ ...e, [key]: "loading" }));
+      api.translate(texts, lang).then(
+        (r) => setExtra((e) => ({ ...e, [key]: r })),
         () => {
-          setExtra(null);
-          setShowTr(false);
-          setShowRm(false);
+          setExtra((e) => {
+            const { [key]: _gone, ...rest } = e;
+            return rest;
+          });
           toast(t.listen.translateFailed, "error");
         },
       );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showTr, showRm, id, lyrics]);
-  const info = extra && extra !== "loading" && extra.id === id ? extra : null;
+  }, [wants.join(), id, lyrics]);
+  const got = (lang: string) => {
+    const v = extra[`${id}|${lang}`];
+    return v && v !== "loading" ? v : null;
+  };
+  const en = got("en");
+  const bn = got("bn");
+  const pending = wants.some((l) => extra[`${id}|${l}`] === "loading");
+  const toggle = (k: keyof Views) => {
+    const next = { ...view, [k]: !view[k] };
+    if (!next.original && !next.banglish && !next.english && !next.bangla) return;
+    setView(next);
+    try {
+      localStorage.setItem(VIEWS_KEY, JSON.stringify(next));
+    } catch {
+      /* storage unavailable */
+    }
+  };
 
   const center = (i: number, smooth = true) => {
     const el = lines.current[i];
@@ -108,12 +141,6 @@ export function LyricsView({ className, full = false }: { className?: string; fu
     <div className={cn("relative flex min-h-0 flex-col", className)}>
       <div className="flex items-center gap-2 px-1 pb-2 text-xs text-fg-2">
         <span className="rounded-full bg-black/25 px-3 py-1.5 font-medium ring-1 ring-white/10">{synced.length ? t.listen.synced : t.listen.plainLyrics} · LRCLIB</span>
-        <button type="button" onClick={() => setShowRm(!showRm)} aria-pressed={showRm} title={t.listen.romanize} className={cn("grid size-8 place-items-center rounded-full bg-black/25 ring-1 ring-white/10", showRm && "bg-accent-soft text-accent-text")}>
-          <TextAaIcon size={16} />
-        </button>
-        <button type="button" onClick={() => setShowTr(!showTr)} aria-pressed={showTr} title={t.listen.translate} className={cn("grid size-8 place-items-center rounded-full bg-black/25 ring-1 ring-white/10", showTr && "bg-accent-soft text-accent-text")}>
-          <GlobeIcon size={16} />
-        </button>
         {synced.length > 0 && (
           <span className="ml-auto flex items-center gap-1 rounded-full bg-black/25 p-1 ring-1 ring-white/10" aria-label={t.listen.syncOffset} title={t.listen.syncOffset}>
             <button type="button" onClick={() => setOffset((o) => Math.round((o - 0.5) * 10) / 10)} className="grid size-7 place-items-center rounded-full hover:bg-white/10" aria-label="-0.5s">
@@ -125,6 +152,28 @@ export function LyricsView({ className, full = false }: { className?: string; fu
             </button>
           </span>
         )}
+      </div>
+
+      <div className="no-scrollbar flex gap-2 overflow-x-auto px-1 pb-2">
+        {(
+          [
+            ["original", "Original"],
+            ["banglish", "Banglish"],
+            ["english", "English"],
+            ["bangla", "বাংলা"],
+          ] as const
+        ).map(([k, label]) => (
+          <button
+            key={k}
+            type="button"
+            aria-pressed={view[k]}
+            onClick={() => toggle(k)}
+            className={cn("h-8 shrink-0 rounded-full px-3.5 text-[13px] font-medium ring-1 ring-white/15", view[k] ? "bg-accent text-accent-ink" : "bg-black/25 text-white/80")}
+          >
+            {label}
+          </button>
+        ))}
+        {pending && <span className="self-center text-xs text-white/60">…</span>}
       </div>
 
       <div
@@ -159,9 +208,10 @@ export function LyricsView({ className, full = false }: { className?: string; fu
                   d === 0 ? (full ? "text-white" : "scale-105 text-accent-text") : "text-fg",
                 )}
               >
-                {l.text || "♪"}
-                {showRm && info?.romanized[i] && <span className="block text-[0.6em] leading-snug font-medium opacity-70">{info.romanized[i]}</span>}
-                {showTr && info?.translation[i] && <span className="block text-[0.6em] leading-snug font-medium text-accent-text">{info.translation[i]}</span>}
+                {view.original || !en?.romanized[i] ? l.text || "♪" : en.romanized[i]}
+                {view.original && view.banglish && en?.romanized[i] && <span className="block text-[0.6em] leading-snug font-medium opacity-70">{en.romanized[i]}</span>}
+                {view.english && en?.translation[i] && <span className="block text-[0.6em] leading-snug font-medium text-accent-text">{en.translation[i]}</span>}
+                {view.bangla && bn?.translation[i] && <span className="block text-[0.6em] leading-snug font-medium text-accent-text">{bn.translation[i]}</span>}
               </button>
             );
           })
