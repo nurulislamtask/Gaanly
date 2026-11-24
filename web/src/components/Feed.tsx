@@ -248,7 +248,7 @@ export function Feed() {
               onClick={() => choose(c)}
               className={cn(
                 "h-9 shrink-0 rounded-full px-4 text-sm font-medium transition-colors",
-                chip === c ? "bg-accent text-accent-ink" : "glass text-fg-2 ring-1 ring-line hover:text-fg",
+                chip === c ? "bg-accent text-accent-ink" : "bg-surface-2 text-fg-2 hover:text-fg",
               )}
             >
               {t.home.feed.chips[c]}
@@ -263,7 +263,7 @@ export function Feed() {
           }}
           aria-label={t.home.feed.refresh}
           title={t.home.feed.refresh}
-          className="mr-4 grid size-9 shrink-0 place-items-center rounded-full text-fg-2 ring-1 ring-line transition-transform hover:text-fg active:rotate-180 md:mr-6"
+          className="mr-4 grid size-9 shrink-0 place-items-center rounded-full bg-surface-2 text-fg-2 transition-transform hover:text-fg active:rotate-180 md:mr-6"
         >
           <ArrowsClockwiseIcon size={18} />
         </button>

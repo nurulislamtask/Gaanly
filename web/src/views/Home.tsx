@@ -18,7 +18,7 @@ function Shortcut({ to, label, tracks, cover }: { to: string; label: string; tra
   const playList = usePlayer((s) => s.playList);
   const t = useT();
   return (
-    <div className="group relative flex h-14 min-w-0 items-center gap-3 overflow-hidden rounded-[14px] glass ring-1 ring-line pr-2 transition-colors hover:bg-surface-3 md:h-16">
+    <div className="group relative flex h-14 min-w-0 items-center gap-3 overflow-hidden rounded-[18px] bg-surface-2 pr-2 transition-colors hover:bg-surface-3 md:h-16">
       <Link to={to} className="absolute inset-0" aria-label={label} />
       <span className="pointer-events-none size-14 shrink-0 overflow-hidden md:size-16">{cover}</span>
       <span className="pointer-events-none min-w-0 flex-1 truncate text-[13px] font-semibold md:text-sm">{label}</span>
