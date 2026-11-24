@@ -1,0 +1,21 @@
+name: Locate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  locate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @gaanly/web exec vite build
+      - run: |
+          ls web/dist/assets | grep '^index-'
+          f=$(ls web/dist/assets/index-*.js | head -1)
+          sed -n 21p "$f" | cut -c68300-69100
