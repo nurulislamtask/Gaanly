@@ -370,16 +370,17 @@ export const usePlayer = create<PlayerState>((set, get) => {
   };
 
   return {
-    queue: saved.queue ?? [],
-    original: saved.original ?? null,
-    index: saved.index ?? 0,
-    status: saved.queue?.length ? "paused" : "idle",
+    // A new launch starts with an empty player; last session's song doesn't reappear in the mini player.
+    queue: [],
+    original: null,
+    index: 0,
+    status: "idle",
     statusText: null,
     mediaKind: "audio",
     videoNote: null,
     videoAspect: 16 / 9,
-    position: saved.position ?? 0,
-    duration: saved.queue?.[saved.index ?? 0]?.duration ?? 0,
+    position: 0,
+    duration: 0,
     buffered: 0,
     volume: saved.volume ?? 0.9,
     muted: saved.muted ?? false,

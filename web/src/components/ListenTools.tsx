@@ -9,12 +9,12 @@ import { useUi } from "../stores/ui";
 
 const pill = (on: boolean) =>
   cn(
-    "flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium ring-1 transition-colors active:scale-95",
+    "flex h-9 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] whitespace-nowrap font-medium ring-1 transition-colors active:scale-95",
     on ? "bg-accent-soft text-accent-text ring-accent/40" : "text-fg-2 ring-line hover:text-fg",
   );
 
 /** Playback speed and the sleep timer: tap to step through the choices. */
-export function ListenTools({ className }: { className?: string }) {
+export function ListenTools({ className, grid = false }: { className?: string; grid?: boolean }) {
   const t = useT();
   const speed = useListening((s) => s.speed);
   const cycleSpeed = useListening((s) => s.cycleSpeed);
@@ -44,7 +44,7 @@ export function ListenTools({ className }: { className?: string }) {
   };
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
+    <div className={cn(grid ? "grid grid-cols-3 gap-2" : "flex flex-wrap items-center gap-2", className)}>
       <button type="button" onClick={cycleSpeed} aria-label={t.listen.speedX(String(speed))} title={t.listen.speed} className={pill(speed !== 1)}>
         <GaugeIcon size={16} /> {speed}x
       </button>

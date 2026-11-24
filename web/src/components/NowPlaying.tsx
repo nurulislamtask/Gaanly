@@ -30,46 +30,42 @@ import { LyricsView } from "./LyricsView";
 import { QueueList } from "./Queue";
 import { SLOT, VideoSlot } from "./Video";
 
-/** The phone's player controls: outlined circles for previous/next, a wide pill for play, three pills underneath. */
+/** The phone's player controls: shuffle, previous, a big play button, next, repeat, all on one row. */
 function PhoneControls() {
   const t = useT();
   const p = usePlayer((s) => s);
   const playing = p.status === "playing" || p.status === "loading";
-  const circle =
-    "grid size-14 shrink-0 place-items-center rounded-full bg-black/25 ring-1 ring-white/20 backdrop-blur-md transition-transform active:scale-90 disabled:opacity-40";
-  const pill =
-    "relative flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-black/25 text-fg ring-1 ring-white/20 backdrop-blur-md transition-transform active:scale-95";
+  const side = "grid size-12 shrink-0 place-items-center rounded-full text-white/90 transition-transform active:scale-90";
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-3">
-        <button type="button" onClick={p.prev} aria-label={t.player.previous} className={circle}>
-          <SkipBackIcon size={24} weight="fill" />
-        </button>
-        <button
-          type="button"
-          onClick={p.toggle}
-          aria-label={playing ? t.common.pause : t.common.play}
-          className={cn(
-            "flex h-16 min-w-0 flex-1 items-center justify-center gap-2 bg-accent text-lg font-semibold text-accent-ink shadow-[0_14px_34px_color-mix(in_srgb,var(--accent)_40%,transparent)] transition-[border-radius,transform] duration-300 active:scale-95",
-            playing ? "rounded-full" : "rounded-[28px]",
-          )}
-        >
-          {playing ? <PauseIcon size={26} weight="fill" /> : <PlayIcon size={26} weight="fill" />}
-          {playing ? t.common.pause : t.common.play}
-        </button>
-        <button type="button" onClick={p.next} aria-label={t.player.next} className={circle}>
-          <SkipForwardIcon size={24} weight="fill" />
-        </button>
-      </div>
-      <div className="flex items-center gap-3">
-        <button type="button" onClick={p.toggleShuffle} aria-label={p.shuffle ? t.player.shuffleOn : t.player.shuffleOff} className={cn(pill, p.shuffle && "text-accent-text ring-accent/60")}>
-          <ShuffleIcon size={20} />
-        </button>
-        <ModeSwitch className="h-12 flex-1 justify-center" />
-        <button type="button" onClick={p.cycleRepeat} aria-label={p.repeat === "off" ? t.player.repeatOff : p.repeat === "one" ? t.player.repeatOne : t.player.repeatAll} className={cn(pill, p.repeat !== "off" && "text-accent-text ring-accent/60")}>
-          {p.repeat === "one" ? <RepeatOnceIcon size={20} /> : <RepeatIcon size={20} />}
-        </button>
-      </div>
+    <div className="flex items-center justify-between">
+      <button type="button" onClick={p.toggleShuffle} aria-label={p.shuffle ? t.player.shuffleOn : t.player.shuffleOff} className={cn(side, p.shuffle ? "text-accent-text" : "text-white/60")}>
+        <ShuffleIcon size={22} />
+      </button>
+      <button type="button" onClick={p.prev} aria-label={t.player.previous} className={side}>
+        <SkipBackIcon size={30} weight="fill" />
+      </button>
+      <button
+        type="button"
+        onClick={p.toggle}
+        aria-label={playing ? t.common.pause : t.common.play}
+        className={cn(
+          "grid size-[72px] shrink-0 place-items-center bg-accent text-accent-ink shadow-[0_14px_34px_color-mix(in_srgb,var(--accent)_40%,transparent)] transition-[border-radius,transform] duration-300 active:scale-95",
+          playing ? "rounded-full" : "rounded-[26px]",
+        )}
+      >
+        {playing ? <PauseIcon size={32} weight="fill" /> : <PlayIcon size={32} weight="fill" />}
+      </button>
+      <button type="button" onClick={p.next} aria-label={t.player.next} className={side}>
+        <SkipForwardIcon size={30} weight="fill" />
+      </button>
+      <button
+        type="button"
+        onClick={p.cycleRepeat}
+        aria-label={p.repeat === "off" ? t.player.repeatOff : p.repeat === "one" ? t.player.repeatOne : t.player.repeatAll}
+        className={cn(side, p.repeat !== "off" ? "text-accent-text" : "text-white/60")}
+      >
+        {p.repeat === "one" ? <RepeatOnceIcon size={22} /> : <RepeatIcon size={22} />}
+      </button>
     </div>
   );
 }
@@ -319,17 +315,9 @@ export function NowPlayingSheet({ open, onClose }: { open: boolean; onClose: () 
             src={track.art || track.thumb}
             alt=""
             aria-hidden="true"
-            className={cn(
-              "pointer-events-none absolute inset-x-0 top-0 w-full object-cover transition-[height,filter] duration-500",
-              view === "player" ? "h-[68%]" : "h-full scale-125 opacity-60 blur-3xl",
-            )}
+            className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-60 blur-3xl"
           />
-          <div
-            className={cn(
-              "pointer-events-none absolute inset-0",
-              view === "player" ? "bg-linear-to-b from-black/30 via-transparent via-45% to-bg to-72%" : "bg-linear-to-b from-bg/40 via-bg/70 to-bg",
-            )}
-          />
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-bg/30 via-bg/60 to-bg" />
 
           <div className="overlay-top relative flex flex-1 flex-col px-5">
             <div className="flex h-16 touch-none items-center gap-2" onPointerDown={(e) => drag.start(e)}>
@@ -366,30 +354,36 @@ export function NowPlayingSheet({ open, onClose }: { open: boolean; onClose: () 
                 <QueueList />
               </div>
             ) : (
-              <div className="flex flex-1 flex-col justify-end gap-4 pb-[calc(16px+env(safe-area-inset-bottom))]">
-                {/* The cover is the page's background; a video clip takes its place when one plays. */}
-                <div className="min-h-0 flex-1 touch-none" onPointerDown={(e) => drag.start(e)}>
-                  {showsVideo && <Stage track={track} slot={SLOT.sheet} />}
+              <div className="flex min-h-0 flex-1 flex-col gap-4 pb-[calc(16px+env(safe-area-inset-bottom))]">
+                <div className="relative min-h-0 flex-1 touch-none" onPointerDown={(e) => drag.start(e)}>
+                  <div className="absolute inset-0 grid place-items-center">
+                    {showsVideo ? (
+                      <Stage track={track} slot={SLOT.sheet} />
+                    ) : (
+                      <Artwork
+                        src={track.art}
+                        fallback={track.thumb}
+                        alt={t.nowPlaying.coverOf(track.title)}
+                        iconSize={48}
+                        className="aspect-square h-full max-w-full rounded-[28px] shadow-[0_24px_60px_rgb(0_0_0/0.5)] ring-1 ring-white/10"
+                      />
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-end gap-3">
+                <div className="flex items-center gap-2">
                   <div className="min-w-0 flex-1">
-                    <h2 className="line-clamp-2 text-[30px] leading-[1.1] font-bold tracking-tight text-white drop-shadow-[0_2px_12px_rgb(0_0_0/0.45)]">
-                      {track.title}
-                    </h2>
-                    <p className="mt-1 truncate text-lg text-white/70">{[track.artist, track.album].filter(Boolean).join(" · ")}</p>
+                    <h2 className="line-clamp-2 text-2xl leading-tight font-bold tracking-tight text-white">{track.title}</h2>
+                    <p className="mt-0.5 truncate text-base text-white/70">{[track.artist, track.album].filter(Boolean).join(" · ")}</p>
                   </div>
                   <FavoriteButton track={track} size="lg" />
-                  <IconButton
-                    label={t.listen.lyrics}
-                    onClick={() => setView("lyrics")}
-                    className="size-12! rounded-full! bg-black/25 ring-1 ring-white/20 backdrop-blur-md"
-                  >
+                  <IconButton label={t.listen.lyrics} onClick={() => setView("lyrics")} className="size-11! rounded-full! bg-white/10 ring-1 ring-white/15">
                     <MicrophoneStageIcon size={22} />
                   </IconButton>
                 </div>
                 <Scrubber touch />
                 <PhoneControls />
-                <ListenTools className="no-scrollbar flex-nowrap overflow-x-auto" />
+                <ModeSwitch />
+                <ListenTools grid />
               </div>
             )}
           </div>

@@ -27,7 +27,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "safe-top sticky top-0 z-10 bg-bg/80 backdrop-blur-xl md:bg-surface-1/80",
+        "safe-top sticky top-0 z-10 bg-linear-to-b from-bg via-bg/90 to-bg/0 md:bg-surface-1/80 md:bg-none md:backdrop-blur-xl",
         // Without a title or actions the header only exists for the phone brand bar.
         ((!title && !actions) || mobileOnly) && "md:hidden",
         className,
@@ -35,6 +35,7 @@ export function PageHeader({
     >
       <div className="flex h-14 items-center gap-3 px-4 md:h-16 md:px-6">
         <LogoMark className="size-7 shrink-0 text-accent-text md:hidden" />
+        {!title && <span className="text-lg font-semibold tracking-tight md:hidden">gaanly</span>}
         {title && <h1 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight md:text-xl">{title}</h1>}
         {!title && <span className="flex-1" />}
         {actions}
