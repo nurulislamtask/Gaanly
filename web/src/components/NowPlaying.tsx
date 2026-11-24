@@ -31,6 +31,14 @@ import { QueueList } from "./Queue";
 import { SLOT, VideoSlot } from "./Video";
 
 /** The phone's player controls: shuffle, previous, a big play button, next, repeat, all on one row. */
+const buzz = () => {
+  try {
+    navigator.vibrate?.(8);
+  } catch {
+    /* no vibration motor */
+  }
+};
+
 function PhoneControls() {
   const t = useT();
   const p = usePlayer((s) => s);
@@ -38,15 +46,15 @@ function PhoneControls() {
   const side = "grid size-12 shrink-0 place-items-center rounded-full text-white/90 transition-transform active:scale-90";
   return (
     <div className="flex items-center justify-between">
-      <button type="button" onClick={p.toggleShuffle} aria-label={p.shuffle ? t.player.shuffleOn : t.player.shuffleOff} className={cn(side, p.shuffle ? "text-accent-text" : "text-white/60")}>
+      <button type="button" onClick={() => (buzz(), p.toggleShuffle())} aria-label={p.shuffle ? t.player.shuffleOn : t.player.shuffleOff} className={cn(side, p.shuffle ? "text-accent-text" : "text-white/60")}>
         <ShuffleIcon size={22} />
       </button>
-      <button type="button" onClick={p.prev} aria-label={t.player.previous} className={side}>
+      <button type="button" onClick={() => (buzz(), p.prev())} aria-label={t.player.previous} className={side}>
         <SkipBackIcon size={30} weight="fill" />
       </button>
       <button
         type="button"
-        onClick={p.toggle}
+        onClick={() => (buzz(), p.toggle())}
         aria-label={playing ? t.common.pause : t.common.play}
         className={cn(
           "grid size-[72px] shrink-0 place-items-center bg-accent text-accent-ink shadow-[0_14px_34px_color-mix(in_srgb,var(--accent)_40%,transparent)] transition-[border-radius,transform] duration-300 active:scale-95",
@@ -55,12 +63,12 @@ function PhoneControls() {
       >
         {playing ? <PauseIcon size={32} weight="fill" /> : <PlayIcon size={32} weight="fill" />}
       </button>
-      <button type="button" onClick={p.next} aria-label={t.player.next} className={side}>
+      <button type="button" onClick={() => (buzz(), p.next())} aria-label={t.player.next} className={side}>
         <SkipForwardIcon size={30} weight="fill" />
       </button>
       <button
         type="button"
-        onClick={p.cycleRepeat}
+        onClick={() => (buzz(), p.cycleRepeat())}
         aria-label={p.repeat === "off" ? t.player.repeatOff : p.repeat === "one" ? t.player.repeatOne : t.player.repeatAll}
         className={cn(side, p.repeat !== "off" ? "text-accent-text" : "text-white/60")}
       >

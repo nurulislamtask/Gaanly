@@ -111,7 +111,7 @@ export const bn: Messages = merge(en, {
     palette: "থিম",
     dynamic: "কভার থেকে রং",
     dynamicBody: "চলতি গানের কভার থেকে অ্যাকসেন্ট রং আসবে।",
-    palettes: { ocean: "সমুদ্র", midnight: "মধ্যরাত (AMOLED)", graphite: "গ্রাফাইট", plum: "বেগুনি", forest: "বন", sunset: "সূর্যাস্ত", crimson: "ক্রিমসন", mocha: "মোকা", slate: "স্লেট" },
+    palettes: { ocean: "সমুদ্র", midnight: "মধ্যরাত (AMOLED)", graphite: "গ্রাফাইট", plum: "বেগুনি", forest: "বন", sunset: "সূর্যাস্ত", crimson: "ক্রিমসন", mocha: "মোকা", slate: "স্লেট", teal: "টিল", rose: "গোলাপি", indigo: "ইন্ডিগো", cyan: "সায়ান", amber: "অ্যাম্বার", lime: "লাইম", violet: "ভায়োলেট", ice: "বরফ" },
   },
   listen: {
     lyrics: "লিরিক্স",

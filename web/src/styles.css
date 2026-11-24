@@ -95,6 +95,38 @@
   --bg: #0e1218; --surface-1: #151b24; --surface-2: #1c2431; --surface-3: #26303f; --surface-4: #333f52;
   --aura-1: rgb(96 165 250 / 0.16); --aura-2: rgb(148 163 184 / 0.1);
 }
+:root[data-palette="teal"]:not([data-theme="light"]) {
+  --bg: #06191a; --surface-1: #0b2325; --surface-2: #102e30; --surface-3: #17403f; --surface-4: #235758;
+  --aura-1: rgb(45 212 191 / 0.22); --aura-2: rgb(56 189 248 / 0.12);
+}
+:root[data-palette="rose"]:not([data-theme="light"]) {
+  --bg: #1c0b14; --surface-1: #28101c; --surface-2: #341626; --surface-3: #451e33; --surface-4: #5a2a44;
+  --aura-1: rgb(244 114 182 / 0.22); --aura-2: rgb(251 146 60 / 0.1);
+}
+:root[data-palette="indigo"]:not([data-theme="light"]) {
+  --bg: #0c0d24; --surface-1: #12142f; --surface-2: #1a1d3f; --surface-3: #242852; --surface-4: #323669;
+  --aura-1: rgb(129 140 248 / 0.24); --aura-2: rgb(192 132 252 / 0.14);
+}
+:root[data-palette="cyan"]:not([data-theme="light"]) {
+  --bg: #07171d; --surface-1: #0c2128; --surface-2: #112c35; --surface-3: #183c48; --surface-4: #235261;
+  --aura-1: rgb(34 211 238 / 0.22); --aura-2: rgb(96 165 250 / 0.12);
+}
+:root[data-palette="amber"]:not([data-theme="light"]) {
+  --bg: #1a1306; --surface-1: #251b09; --surface-2: #31240d; --surface-3: #413113; --surface-4: #58441b;
+  --aura-1: rgb(251 191 36 / 0.2); --aura-2: rgb(251 146 60 / 0.14);
+}
+:root[data-palette="lime"]:not([data-theme="light"]) {
+  --bg: #0f1706; --surface-1: #16210a; --surface-2: #1d2c0e; --surface-3: #283d14; --surface-4: #37531c;
+  --aura-1: rgb(163 230 53 / 0.2); --aura-2: rgb(52 211 153 / 0.1);
+}
+:root[data-palette="violet"]:not([data-theme="light"]) {
+  --bg: #14092a; --surface-1: #1c0e3a; --surface-2: #26144d; --surface-3: #331c66; --surface-4: #442688;
+  --aura-1: rgb(167 139 250 / 0.26); --aura-2: rgb(232 121 249 / 0.14);
+}
+:root[data-palette="ice"]:not([data-theme="light"]) {
+  --bg: #0b141c; --surface-1: #111d28; --surface-2: #182735; --surface-3: #223647; --surface-4: #2f4960;
+  --aura-1: rgb(125 211 252 / 0.2); --aura-2: rgb(203 213 225 / 0.1);
+}
 
 /* Glass: panels are frosted and let the aurora behind them show through. Settings > Layout > Glass turns it off
    (solid panels, no blur): lighter on slow phones. */

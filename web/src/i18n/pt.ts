@@ -105,6 +105,7 @@ export const pt: Messages = {
   },
 
   library: {
+    stats: { title: "Sua audição", songs: "Músicas", artists: "Artistas", minutes: "Minutos", top: "Artistas mais ouvidos" },
     backup: "Backup da biblioteca (exportar ou importar)",
     newShort: "Nova",
     create: "Criar",
@@ -260,6 +261,7 @@ export const pt: Messages = {
     pitchKept: "Tom mantido",
     shareLine: "Compartilhar este verso",
     shareCard: "Compartilhar como imagem",
+    exportLrc: "Salvar letra (.lrc)",
     cardMade: "Imagem pronta",
     savePlaylist: "Salvar como playlist",
     playlistSaved: (n: number) => `${n} músicas salvas como playlist`,
@@ -453,7 +455,7 @@ export const pt: Messages = {
     palette: "Tema",
     dynamic: "Cores da capa",
     dynamicBody: "A cor de destaque segue a música que está tocando.",
-    palettes: { ocean: "Oceano", midnight: "Meia-noite (AMOLED)", graphite: "Grafite", plum: "Ameixa", forest: "Floresta", sunset: "Pôr do sol", crimson: "Carmim", mocha: "Mocha", slate: "Ardósia" },
+    palettes: { ocean: "Oceano", midnight: "Meia-noite (AMOLED)", graphite: "Grafite", plum: "Ameixa", forest: "Floresta", sunset: "Pôr do sol", crimson: "Carmim", mocha: "Mocha", slate: "Ardósia", teal: "Verde-água", rose: "Rosa", indigo: "Índigo", cyan: "Ciano", amber: "Âmbar", lime: "Lima", violet: "Violeta", ice: "Gelo" },
     accent: "Cor de destaque",
     customColor: "Cor personalizada",
     colors: {

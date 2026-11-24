@@ -1,7 +1,7 @@
 import { ArrowDownIcon, GlobeIcon, MinusIcon, PlusIcon, ShareNetworkIcon, TextAaIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
-import { api } from "../lib/api";
+import { api, saveFile } from "../lib/api";
 import type { Lyrics, Translated } from "../lib/apiTypes";
 import { cn } from "../lib/format";
 import { quoteCard, shareImage } from "../lib/quoteCard";
@@ -189,6 +189,21 @@ export function LyricsView({ className, full = false }: { className?: string; fu
           className="absolute right-2 bottom-16 flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-black shadow-lg active:scale-95"
         >
           <ArrowDownIcon size={16} weight="bold" /> {t.listen.returnCurrent}
+        </button>
+      )}
+
+      {synced.length > 0 && track && (
+        <button
+          type="button"
+          onClick={() => {
+            const stamp = (s: number) => `[${String(Math.floor(s / 60)).padStart(2, "0")}:${(s % 60).toFixed(2).padStart(5, "0")}]`;
+            const body = synced.map((l) => `${stamp(l.t)}${l.text}`).join("\n");
+            const name = `${track.artist} - ${track.title}`.replace(/[\\/:*?"<>|]+/g, " ").slice(0, 80);
+            void saveFile(`${name}.lrc`, `[ti:${track.title}]\n[ar:${track.artist}]\n${body}\n`).catch(() => {});
+          }}
+          className="mx-auto mt-2 flex h-10 items-center gap-2 rounded-full bg-black/30 px-5 text-sm font-medium text-white ring-1 ring-white/15 backdrop-blur-md active:scale-95"
+        >
+          {t.listen.exportLrc}
         </button>
       )}
 

@@ -18,7 +18,7 @@ export interface Appearance {
   homeFavorites: boolean;
 }
 
-export const PALETTES = ["ocean", "midnight", "graphite", "plum", "forest", "sunset", "crimson", "mocha", "slate"] as const;
+export const PALETTES = ["ocean", "midnight", "graphite", "plum", "forest", "sunset", "crimson", "mocha", "slate", "teal", "rose", "indigo", "cyan", "amber", "lime", "violet", "ice"] as const;
 export type Palette = (typeof PALETTES)[number];
 
 export const DEFAULT_APPEARANCE: Appearance = {

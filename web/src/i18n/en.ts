@@ -110,6 +110,7 @@ export const en = {
   },
 
   library: {
+    stats: { title: "Your listening", songs: "Songs", artists: "Artists", minutes: "Minutes", top: "Top artists" },
     backup: "Library backup (export or import)",
     newShort: "New",
     create: "Create",
@@ -266,6 +267,7 @@ export const en = {
     pitchKept: "Pitch kept",
     shareLine: "Share this line",
     shareCard: "Share as picture",
+    exportLrc: "Save lyrics (.lrc)",
     cardMade: "Picture ready",
     savePlaylist: "Save as playlist",
     playlistSaved: (n: number) => `Saved ${n} songs as a playlist`,
@@ -459,7 +461,7 @@ export const en = {
     palette: "Theme",
     dynamic: "Colours from the cover",
     dynamicBody: "The accent colour follows the song that is playing.",
-    palettes: { ocean: "Ocean", midnight: "Midnight (AMOLED)", graphite: "Graphite", plum: "Plum", forest: "Forest", sunset: "Sunset", crimson: "Crimson", mocha: "Mocha", slate: "Slate" },
+    palettes: { ocean: "Ocean", midnight: "Midnight (AMOLED)", graphite: "Graphite", plum: "Plum", forest: "Forest", sunset: "Sunset", crimson: "Crimson", mocha: "Mocha", slate: "Slate", teal: "Teal", rose: "Rose", indigo: "Indigo", cyan: "Cyan", amber: "Amber", lime: "Lime", violet: "Violet", ice: "Ice" },
     accent: "Accent color",
     customColor: "Custom color",
     colors: {

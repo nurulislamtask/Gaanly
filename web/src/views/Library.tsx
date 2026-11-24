@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router";
 import { Cover, type CoverKind } from "../components/Cover";
 import { NamePlaylistDialog } from "../components/Dialogs";
 import { PageHeader } from "../components/Page";
+import { ListeningStats } from "../components/ListeningStats";
 import { useT } from "../i18n";
 import { paths } from "../lib/routes";
 import type { Track } from "../lib/types";
@@ -80,6 +81,8 @@ export default function Library() {
           />
         ))}
       </ul>
+
+      <ListeningStats />
 
       {playlists.length === 0 && (
         <p className="px-4 pt-6 text-sm text-fg-2 md:px-6">
