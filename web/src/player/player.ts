@@ -707,3 +707,6 @@ export function setFadeLevel(level: number) {
   if (s.muted) return;
   audio.volume = videoEl.volume = s.volume * level;
 }
+
+// Lets the automated screenshot test drive the player.
+(globalThis as { __gaanly?: unknown }).__gaanly = { usePlayer };

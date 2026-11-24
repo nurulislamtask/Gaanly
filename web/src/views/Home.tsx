@@ -68,7 +68,8 @@ export default function Home() {
       <PageHeader />
 
       <div className="px-4 pt-2 pb-6 md:px-6 md:pt-8">
-        <h1 className="text-2xl leading-tight font-semibold tracking-tight md:text-4xl">{t.time.greeting(new Date().getHours())}</h1>
+        <p className="text-xs text-fg-3">{new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</p>
+        <h1 className="text-[28px] leading-tight font-bold tracking-tight md:text-4xl">{t.time.greeting(new Date().getHours())}</h1>
       </div>
 
       {!empty && status === "ready" && show.homeShortcuts && (

@@ -67,7 +67,6 @@ export function ForYou() {
     return () => ctl.abort();
   }, [seed?.id, artist]);
 
-  const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
   const startRadioNow = () => {
     const s = seed ?? trending[0];
     if (s) void startRadio(s);
@@ -85,17 +84,12 @@ export function ForYou() {
 
   return (
     <div className="flex flex-col gap-7">
-      <div className="px-4 md:px-6">
-        <p className="text-xs text-fg-3">{today}</p>
-        <h2 className="text-[28px] leading-tight font-bold tracking-tight">{f.title}</h2>
-      </div>
-
       <button
         type="button"
         onClick={startRadioNow}
         className="relative mx-4 flex min-h-36 items-end justify-between gap-4 overflow-hidden rounded-[32px] bg-linear-to-br from-accent/45 via-accent/15 to-surface-2 p-6 text-left md:mx-6"
       >
-        <RadioIcon size={150} weight="fill" className="pointer-events-none absolute -top-6 -right-6 text-accent/20" />
+        <RadioIcon size={120} weight="fill" className="pointer-events-none absolute -top-4 right-16 text-accent/15" />
         <span className="relative min-w-0">
           <span className="block text-2xl font-bold tracking-tight">{f.radio}</span>
           <span className="mt-1 block text-sm text-fg-2">{f.radioSub}</span>
