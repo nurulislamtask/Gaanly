@@ -16,6 +16,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @gaanly/web exec vite build
       - run: |
-          ls web/dist/assets | grep '^index-'
           f=$(ls web/dist/assets/index-*.js | head -1)
-          sed -n 21p "$f" | cut -c68300-69100
+          awk '{ print NR": "length($0) }' "$f" | head -40
+          awk 'length($0) > 68809 { print "LONGLINE " NR; print substr($0, 68300, 800) }' "$f"

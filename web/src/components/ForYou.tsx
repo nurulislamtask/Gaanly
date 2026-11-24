@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useT } from "../i18n";
 import { api } from "../lib/api";
-import { cn } from "../lib/format";
 import { paths } from "../lib/routes";
 import type { Track } from "../lib/types";
 import { usePlayer } from "../player/player";
