@@ -38,6 +38,14 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
 
+            <!-- Spotify login comes back to the app through gaanly://spotify -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="gaanly" android:host="spotify" />
+            </intent-filter>
+
         </activity>
 
         <provider

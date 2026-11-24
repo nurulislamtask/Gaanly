@@ -17,6 +17,7 @@ import { AboutSection } from "./AboutSection";
 import { BackupSection } from "./BackupSection";
 import { AccentPicker, LayoutSection, PalettePicker } from "./CustomizeSection";
 import { HomeSettings } from "./TuneDialog";
+import { SpotifySection } from "./SpotifySection";
 import { Modal } from "./Modal";
 
 function Segmented<T extends string>({
@@ -156,6 +157,8 @@ export function SettingsDialog() {
         </section>
 
         <HomeSettings />
+
+        <SpotifySection />
 
         <LayoutSection />
 
