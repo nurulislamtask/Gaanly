@@ -77,58 +77,37 @@ export default function Collection({ kind }: Props) {
     <div className="pb-8">
       <PageHeader title={name} mobileOnly />
 
-      <div className="relative">
-        {tracks[0] && (
-          <img
-            src={tracks[0].art || tracks[0].thumb}
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 -top-24 h-[420px] w-full scale-110 object-cover opacity-45 blur-2xl"
-          />
-        )}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-24 h-[420px] bg-linear-to-b from-accent-soft/40 via-bg/60 to-bg" />
-        <div className="relative flex flex-col items-center gap-5 px-4 pt-2 pb-6 md:flex-row md:items-end md:gap-6 md:px-6 md:pt-10">
-          <Cover
-            kind={kind}
-            tracks={tracks}
-            iconSize={64}
-            className="size-44 shrink-0 rounded-[18px] shadow-[0_24px_60px_rgb(0_0_0/0.4)] md:size-52"
-          />
-          <div className="flex min-w-0 flex-col items-center gap-2 text-center md:items-start md:text-left">
-            <span className="hidden text-xs font-medium text-fg-2 md:block">{label}</span>
-            <h1 className="max-w-full text-[28px] leading-[1.1] font-bold tracking-tight break-words md:text-5xl lg:text-6xl">{name}</h1>
-            <p className="font-mono text-[13px] text-fg-2">
-              {t.common.tracks(tracks.length)}
-              {total > 0 && <> · {t.time.total(total)}</>}
-            </p>
-          </div>
+      <div className="flex flex-col items-center gap-4 px-4 pt-2 pb-5 md:flex-row md:items-end md:gap-6 md:px-6 md:pt-10">
+        <Cover kind={kind} tracks={tracks} iconSize={64} className="size-48 shrink-0 rounded-3xl shadow-[0_16px_40px_rgb(20_17_43/0.25)] md:size-52" />
+        <div className="flex min-w-0 flex-col items-center gap-1 text-center md:items-start md:text-left">
+          <span className="hidden text-xs font-medium text-fg-2 md:block">{label}</span>
+          <h1 className="max-w-full text-2xl leading-tight font-semibold tracking-tight break-words md:text-5xl lg:text-6xl">{name}</h1>
+          <p className="text-sm text-fg-3">
+            {t.common.tracks(tracks.length)}
+            {total > 0 && <> · {t.time.total(total)}</>}
+          </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 px-4 pb-4 md:px-6">
-        <IconButton
-          label={t.collection.shuffle}
-          size="lg"
-          disabled={!tracks.length}
-          className="size-14! rounded-full! bg-surface-3 ring-1 ring-line"
-          onClick={() => playList(shuffled(shown.length ? shown : tracks), 0)}
-        >
-          <ShuffleIcon size={24} />
+      <div className="flex items-center justify-center gap-4 px-4 pb-5 md:justify-start md:px-6">
+        <IconButton label={t.collection.shuffle} size="lg" disabled={!tracks.length} className="size-12! rounded-full! bg-surface-2" onClick={() => playList(shuffled(shown.length ? shown : tracks), 0)}>
+          <ShuffleIcon size={22} />
         </IconButton>
         <button
           type="button"
           disabled={!tracks.length}
           aria-label={playing ? t.common.pause : t.common.playX(name)}
           onClick={() => (isThisPlaying ? toggle() : playList(shown, 0))}
-          className="flex h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-accent px-8 text-lg font-semibold text-accent-ink shadow-[0_12px_30px_color-mix(in_srgb,var(--accent)_35%,transparent)] transition-transform active:scale-[0.97] disabled:opacity-40 md:max-w-48 md:flex-none"
+          className="grid size-16 place-items-center rounded-full bg-accent text-white shadow-[0_12px_28px_color-mix(in_srgb,var(--accent)_40%,transparent)] transition-transform active:scale-95 disabled:opacity-40"
         >
-          {playing ? <PauseIcon size={24} weight="fill" /> : <PlayIcon size={24} weight="fill" />}
-          {playing ? t.common.pause : t.listen.play}
+          {playing ? <PauseIcon size={28} weight="fill" /> : <PlayIcon size={28} weight="fill" />}
         </button>
-        {kind === "playlist" && (
-          <IconButton label={t.collection.more} size="lg" className="size-14! rounded-full! bg-surface-3 ring-1 ring-line" onClick={() => setMoreOpen(true)}>
-            <DotsThreeIcon size={26} weight="bold" />
+        {kind === "playlist" ? (
+          <IconButton label={t.collection.more} size="lg" className="size-12! rounded-full! bg-surface-2" onClick={() => setMoreOpen(true)}>
+            <DotsThreeIcon size={24} weight="bold" />
           </IconButton>
+        ) : (
+          <span className="size-12" aria-hidden="true" />
         )}
       </div>
 

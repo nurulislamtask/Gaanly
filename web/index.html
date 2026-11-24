@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#14112B" />
+    <meta name="theme-color" content="#F7F7FB" />
     <meta name="description" content="Your music, uninterrupted." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -36,7 +36,7 @@
     </script>
     <script>
       try {
-        var t = localStorage.getItem("gaanly:theme");
+        var t = localStorage.getItem("gaanly:theme2") || "light";
         if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
         // Before the app loads, so screen readers and the browser see the chosen language right away.
         var l = localStorage.getItem("gaanly:lang");

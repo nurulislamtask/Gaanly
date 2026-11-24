@@ -55,7 +55,7 @@ interface UiState {
   setTheater: (open: boolean) => void;
 }
 
-const readTheme = (): Theme => (document.documentElement.dataset.theme === "light" ? "light" : "dark");
+const readTheme = (): Theme => (document.documentElement.dataset.theme === "dark" ? "dark" : "light");
 const readPanel = (): boolean => {
   try {
     return localStorage.getItem("gaanly:panel") !== "closed";
@@ -83,7 +83,7 @@ export const useUi = create<UiState>((set, get) => ({
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#14112B" : "#F7F7FB");
     desktop?.setTheme(theme);
     try {
-      localStorage.setItem("gaanly:theme", theme);
+      localStorage.setItem("gaanly:theme2", theme);
     } catch {
       /* private mode */
     }

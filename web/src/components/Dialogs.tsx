@@ -72,12 +72,10 @@ export function AddToPlaylistDialog() {
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="flex items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-surface-3"
+            className="mb-2 flex h-12 items-center justify-center gap-2 rounded-full border border-line-strong text-sm font-medium"
           >
-            <span className="grid size-11 place-items-center rounded-[10px] bg-accent-soft text-accent-text">
-              <PlusIcon size={20} />
-            </span>
-            <span className="font-medium">{t.nav.newPlaylist}</span>
+            <PlusIcon size={18} />
+            {t.nav.newPlaylist}
           </button>
           {playlists.map((p) => {
             // Done only when it already has every track being added.
@@ -90,20 +88,26 @@ export function AddToPlaylistDialog() {
                 onClick={() => {
                   if (!tracks) return;
                   void add(p.id, many ? tracks : tracks[0]);
-                  close(null);
                 }}
-                className={cn("flex items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-surface-3", has && "opacity-60")}
+                className="flex items-center gap-3 rounded-xl px-2 py-2 text-left"
               >
-                <Artwork src={p.tracks[0]?.thumb} className="size-11 rounded-[10px]" />
+                <Artwork src={p.tracks[0]?.thumb} className="size-14 rounded-xl" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{p.name}</span>
                   <span className="block text-sm text-fg-2">{t.common.tracks(p.tracks.length)}</span>
                 </span>
-                {has && <CheckIcon size={18} className="text-accent-text" />}
+                <span className={cn("grid size-6 place-items-center rounded-full", has ? "bg-accent text-accent-ink" : "border-2 border-line-strong")}>
+                  {has && <CheckIcon size={14} weight="bold" />}
+                </span>
               </button>
             );
           })}
         </div>
+      )}
+      {!creating && (
+        <button type="button" onClick={() => close(null)} className="mt-3 h-12 w-full rounded-full bg-accent text-sm font-semibold text-accent-ink active:scale-[0.98]">
+          {t.home.tune.done}
+        </button>
       )}
     </Modal>
   );

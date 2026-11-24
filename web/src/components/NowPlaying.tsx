@@ -344,7 +344,8 @@ export function NowPlayingSheet({ open, onClose }: { open: boolean; onClose: () 
           onDragEnd={(_, info) => {
             if (info.offset.y > 120 || info.velocity.y > 700) onClose();
           }}
-          className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-bg md:hidden"
+          data-theme="dark"
+          className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-bg text-fg md:hidden"
         >
           
 
