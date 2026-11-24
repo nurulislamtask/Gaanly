@@ -1,7 +1,7 @@
 import {
   CaretDownIcon,
   MagnifyingGlassIcon,
-  MicrophoneStageIcon,
+  ArrowsOutSimpleIcon,
   PauseIcon,
   PlayIcon,
   QueueIcon,
@@ -18,6 +18,7 @@ import { AnimatePresence, motion, useDragControls, useReducedMotion } from "moti
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "../i18n";
+import { api } from "../lib/api";
 import { cn } from "../lib/format";
 import type { Track } from "../lib/types";
 import { selectCurrent, usePlayer, useStatusText } from "../player/player";
@@ -31,6 +32,32 @@ import { QueueList } from "./Queue";
 import { SLOT, VideoSlot } from "./Video";
 
 /** The phone's player controls: shuffle, previous, a big play button, next, repeat, all on one row. */
+/** A small card under the controls with the first lyric lines; tapping opens the full lyrics. */
+function LyricsPeek({ track, onOpen }: { track: Track; onOpen: () => void }) {
+  const t = useT();
+  const [lines, setLines] = useState<string[]>([]);
+  useEffect(() => {
+    let live = true;
+    setLines([]);
+    api.lyrics(track).then(
+      (l) => live && setLines((l?.synced.length ? l.synced.map((s) => s.text) : (l?.plain ?? "").split("\n")).filter((s) => s.trim()).slice(0, 2)),
+      () => {},
+    );
+    return () => {
+      live = false;
+    };
+  }, [track]);
+  return (
+    <button type="button" onClick={onOpen} className="flex flex-col gap-1.5 rounded-2xl bg-surface-2 p-4 text-left active:scale-[0.99]">
+      <span className="flex items-center justify-between text-sm font-semibold">
+        {t.listen.lyrics}
+        <ArrowsOutSimpleIcon size={18} className="text-fg-3" />
+      </span>
+      <span className="line-clamp-2 min-h-10 text-sm leading-5 text-fg-2">{lines.length ? lines.join("\n") : "…"}</span>
+    </button>
+  );
+}
+
 const buzz = () => {
   try {
     navigator.vibrate?.(8);
@@ -43,10 +70,10 @@ function PhoneControls() {
   const t = useT();
   const p = usePlayer((s) => s);
   const playing = p.status === "playing" || p.status === "loading";
-  const side = "grid size-12 shrink-0 place-items-center rounded-full text-white/90 transition-transform active:scale-90";
+  const side = "grid size-12 shrink-0 place-items-center rounded-full text-fg transition-transform active:scale-90";
   return (
     <div className="flex items-center justify-between">
-      <button type="button" onClick={() => (buzz(), p.toggleShuffle())} aria-label={p.shuffle ? t.player.shuffleOn : t.player.shuffleOff} className={cn(side, p.shuffle ? "text-accent-text" : "text-white/60")}>
+      <button type="button" onClick={() => (buzz(), p.toggleShuffle())} aria-label={p.shuffle ? t.player.shuffleOn : t.player.shuffleOff} className={cn(side, p.shuffle ? "text-accent-text" : "text-fg-3")}>
         <ShuffleIcon size={22} />
       </button>
       <button type="button" onClick={() => (buzz(), p.prev())} aria-label={t.player.previous} className={side}>
@@ -57,8 +84,8 @@ function PhoneControls() {
         onClick={() => (buzz(), p.toggle())}
         aria-label={playing ? t.common.pause : t.common.play}
         className={cn(
-          "grid size-[72px] shrink-0 place-items-center bg-accent text-accent-ink shadow-[0_14px_34px_color-mix(in_srgb,var(--accent)_40%,transparent)] transition-[border-radius,transform] duration-300 active:scale-95",
-          playing ? "rounded-full" : "rounded-[26px]",
+          "grid size-16 shrink-0 place-items-center bg-accent text-white shadow-[0_12px_28px_color-mix(in_srgb,var(--accent)_45%,transparent)] transition-transform active:scale-95",
+          "rounded-full",
         )}
       >
         {playing ? <PauseIcon size={32} weight="fill" /> : <PlayIcon size={32} weight="fill" />}
@@ -70,7 +97,7 @@ function PhoneControls() {
         type="button"
         onClick={() => (buzz(), p.cycleRepeat())}
         aria-label={p.repeat === "off" ? t.player.repeatOff : p.repeat === "one" ? t.player.repeatOne : t.player.repeatAll}
-        className={cn(side, p.repeat !== "off" ? "text-accent-text" : "text-white/60")}
+        className={cn(side, p.repeat !== "off" ? "text-accent-text" : "text-fg-3")}
       >
         {p.repeat === "one" ? <RepeatOnceIcon size={22} /> : <RepeatIcon size={22} />}
       </button>
@@ -319,26 +346,20 @@ export function NowPlayingSheet({ open, onClose }: { open: boolean; onClose: () 
           }}
           className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-bg md:hidden"
         >
-          <img
-            src={track.art || track.thumb}
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-60 blur-3xl"
-          />
-          <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-bg/30 via-bg/60 to-bg" />
+          
 
           <div className="overlay-top relative flex flex-1 flex-col px-5">
             <div className="flex h-16 touch-none items-center gap-2" onPointerDown={(e) => drag.start(e)}>
-              <IconButton label={t.common.close} onClick={onClose} className="size-11! rounded-full! bg-black/30 text-white ring-1 ring-white/20 backdrop-blur-md">
+              <IconButton label={t.common.close} onClick={onClose} className="size-11! rounded-full! bg-surface-2 text-fg">
                 <CaretDownIcon size={22} />
               </IconButton>
-              <span className="mx-auto text-[11px] font-semibold tracking-[0.18em] text-white/80 uppercase">{t.nowPlaying.title}</span>
-              <DownloadButton className="size-11! rounded-full bg-black/30 text-white ring-1 ring-white/20 backdrop-blur-md" />
+              <span className="mx-auto text-[11px] font-semibold tracking-[0.18em] text-fg-3 uppercase">{t.nowPlaying.title}</span>
+              <DownloadButton className="size-11! rounded-full bg-surface-2 text-fg" />
               <IconButton
                 label={view === "queue" ? t.nowPlaying.backToPlayer : t.nowPlaying.showQueue}
                 active={view === "queue"}
                 onClick={() => setView(view === "queue" ? "player" : "queue")}
-                className="size-11! rounded-full! bg-black/30 text-white ring-1 ring-white/20 backdrop-blur-md"
+                className="size-11! rounded-full! bg-surface-2 text-fg"
               >
                 <QueueIcon size={22} />
               </IconButton>
@@ -373,23 +394,21 @@ export function NowPlayingSheet({ open, onClose }: { open: boolean; onClose: () 
                         fallback={track.thumb}
                         alt={t.nowPlaying.coverOf(track.title)}
                         iconSize={48}
-                        className="size-[min(100cqw,100cqh)] rounded-[28px] shadow-[0_24px_60px_rgb(0_0_0/0.5)] ring-1 ring-white/10"
+                        className="size-[min(100cqw,100cqh)] rounded-3xl shadow-[0_20px_50px_rgb(0_0_0/0.35)]"
                       />
                     )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="min-w-0 flex-1">
-                    <h2 className="line-clamp-2 text-2xl leading-tight font-bold tracking-tight text-white">{track.title}</h2>
-                    <p className="mt-0.5 truncate text-base text-white/70">{[track.artist, track.album].filter(Boolean).join(" · ")}</p>
+                    <h2 className="line-clamp-2 text-2xl leading-tight font-semibold tracking-tight text-fg">{track.title}</h2>
+                    <p className="mt-0.5 truncate text-base text-fg-3">{[track.artist, track.album].filter(Boolean).join(" · ")}</p>
                   </div>
                   <FavoriteButton track={track} size="lg" />
-                  <IconButton label={t.listen.lyrics} onClick={() => setView("lyrics")} className="size-11! rounded-full! bg-white/10 ring-1 ring-white/15">
-                    <MicrophoneStageIcon size={22} />
-                  </IconButton>
                 </div>
                 <Scrubber touch />
                 <PhoneControls />
+                <LyricsPeek track={track} onOpen={() => setView("lyrics")} />
                 <ModeSwitch />
                 <ListenTools grid />
               </div>

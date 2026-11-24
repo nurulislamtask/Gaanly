@@ -1,10 +1,9 @@
-import { ArrowLeftIcon, GearSixIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { useT } from "../i18n";
 import { cn } from "../lib/format";
-import { needsAttention, useSystem } from "../stores/system";
-import { useUi } from "../stores/ui";
+import { paths } from "../lib/routes";
 import { LogoMark } from "./Brand";
 import { IconButton } from "./IconButton";
 
@@ -21,8 +20,7 @@ export function PageHeader({
   mobileOnly?: boolean;
   className?: string;
 }) {
-  const setSettingsOpen = useUi((s) => s.setSettingsOpen);
-  const attention = useSystem((s) => needsAttention(s.info));
+  const navigate = useNavigate();
   const t = useT();
   return (
     <header
@@ -40,12 +38,11 @@ export function PageHeader({
         {!title && <span className="flex-1" />}
         {actions}
         <IconButton
-          label={attention ? t.nav.settingsUpdate : t.nav.settings}
-          onClick={() => setSettingsOpen(true)}
+          label={t.nav.search}
+          onClick={() => navigate(paths.search)}
           className="-mr-2 md:hidden"
         >
-          <GearSixIcon size={22} />
-          {attention && <span className="absolute top-2 right-2 size-2 rounded-full bg-accent ring-2 ring-bg" />}
+          <MagnifyingGlassIcon size={22} />
         </IconButton>
       </div>
     </header>

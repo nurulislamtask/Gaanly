@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#07162E" />
+    <meta name="theme-color" content="#14112B" />
     <meta name="description" content="Your music, uninterrupted." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -49,10 +49,10 @@
           s.textContent = css;
           document.head.appendChild(s);
         }
-        var a = JSON.parse(localStorage.getItem("gaanly:appearance") || "{}");
+        var a = JSON.parse(localStorage.getItem("gaanly:appearance2") || "{}");
         if (a.compactSidebar === true) document.documentElement.dataset.rail = "compact";
-        if (a.texture === false) document.documentElement.dataset.texture = "off";
-        if (a.glass === false) document.documentElement.dataset.glass = "off";
+        if (a.texture !== true) document.documentElement.dataset.texture = "off";
+        if (a.glass !== true) document.documentElement.dataset.glass = "off";
       } catch (e) {}
     </script>
   </head>

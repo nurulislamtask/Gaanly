@@ -80,7 +80,7 @@ export const useUi = create<UiState>((set, get) => ({
 
   setTheme: (theme) => {
     document.documentElement.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#07162E" : "#E9EBEF");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#14112B" : "#F7F7FB");
     desktop?.setTheme(theme);
     try {
       localStorage.setItem("gaanly:theme", theme);

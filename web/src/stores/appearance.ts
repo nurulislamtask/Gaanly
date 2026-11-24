@@ -28,8 +28,8 @@ export const DEFAULT_APPEARANCE: Appearance = {
   sidebarPlaylists: true,
   compactSidebar: false,
   albumColumn: true,
-  texture: true,
-  glass: true,
+  texture: false,
+  glass: false,
   homeShortcuts: true,
   homeRecent: true,
   homeFavorites: true,
@@ -47,7 +47,7 @@ export const ACCENTS = [
   { id: "amber", color: "#fbbf24" },
 ] as const;
 
-const KEY = "gaanly:appearance";
+const KEY = "gaanly:appearance2";
 // The accent CSS itself, so index.html can apply it before the app loads (no flash of the default colour).
 const CSS_KEY = "gaanly:accent-css";
 

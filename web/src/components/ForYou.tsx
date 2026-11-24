@@ -1,22 +1,6 @@
-import {
-  BarbellIcon,
-  CarIcon,
-  CloudRainIcon,
-  CompassIcon,
-  ConfettiIcon,
-  DownloadSimpleIcon,
-  HeartIcon,
-  LeafIcon,
-  LightningIcon,
-  MoonStarsIcon,
-  PlayIcon,
-  RadioIcon,
-  ShuffleIcon,
-  SmileyIcon,
-  TargetIcon,
-} from "@phosphor-icons/react";
-import { useEffect, useState, type ComponentType } from "react";
-import { Link } from "react-router";
+import { PlayIcon } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { useT } from "../i18n";
 import { api } from "../lib/api";
 import { cn } from "../lib/format";
@@ -28,49 +12,147 @@ import { Artwork } from "./Artwork";
 import { Section } from "./Page";
 import { TrackList } from "./TrackList";
 
-const VIBES: readonly [string, string, ComponentType<{ size?: number; weight?: "fill" }>, string][] = [
-  ["energize", "energetic upbeat", LightningIcon, "from-amber-500/40 to-orange-600/20"],
-  ["relax", "relaxing calm", LeafIcon, "from-emerald-500/35 to-teal-600/15"],
-  ["focus", "focus study instrumental", TargetIcon, "from-sky-500/35 to-indigo-600/15"],
-  ["workout", "workout gym", BarbellIcon, "from-rose-500/40 to-red-700/15"],
-  ["party", "party dance", ConfettiIcon, "from-fuchsia-500/40 to-purple-700/15"],
-  ["commute", "commute road trip", CarIcon, "from-cyan-500/35 to-blue-700/15"],
-  ["sleep", "sleep soft", MoonStarsIcon, "from-indigo-500/40 to-slate-700/20"],
-  ["feelGood", "feel good happy", SmileyIcon, "from-yellow-400/40 to-lime-600/15"],
-  ["romance", "romantic love", HeartIcon, "from-pink-500/40 to-rose-700/15"],
-  ["sad", "sad emotional", CloudRainIcon, "from-slate-400/30 to-blue-900/25"],
-];
+const POPULAR = ["Arijit Singh", "Atif Aslam", "Shreya Ghoshal", "Jubin Nautiyal", "Hamza Malik", "Rahat Fateh Ali Khan", "Anupam Roy", "Neha Kakkar", "Taylor Swift", "Ed Sheeran"];
+const GENRES = [
+  ["Energize", "energetic upbeat"],
+  ["Relax", "relaxing calm"],
+  ["Focus", "focus study instrumental"],
+  ["Workout", "workout gym"],
+  ["Party", "party dance"],
+  ["Romance", "romantic love"],
+  ["Sad", "sad emotional"],
+  ["Sleep", "sleep soft"],
+  ["Feel good", "feel good happy"],
+  ["Commute", "commute road trip"],
+] as const;
 
-/** "Made for you": an endless radio card, quick links, mood chips and picks drawn from what was played. */
-export function ForYou() {
+const artistPhotos = new Map<string, string>();
+
+/** A round row of singers (from what was played, else popular ones); a tap searches for them. */
+function TopArtists() {
+  const history = useLibrary((s) => s.history);
+  const navigate = useNavigate();
+  const names = [...new Set([...history.map((h) => h.artist.split(/,|&/)[0]?.trim() ?? ""), ...POPULAR].filter(Boolean))].slice(0, 10);
+  const [, bump] = useState(0);
+  useEffect(() => {
+    let live = true;
+    for (const n of names) {
+      if (artistPhotos.has(n)) continue;
+      artistPhotos.set(n, "");
+      api.search(n, "song").then(
+        (r) => {
+          artistPhotos.set(n, r[0]?.art || r[0]?.thumb || "");
+          if (live) bump((v) => v + 1);
+        },
+        () => artistPhotos.delete(n),
+      );
+    }
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [names.join()]);
+  return (
+    <Section title="Top Artist">
+      <div className="no-scrollbar flex gap-4 overflow-x-auto px-4 md:px-6">
+        {names.map((n) => (
+          <button key={n} type="button" onClick={() => navigate(`/search?q=${encodeURIComponent(n)}`)} className="flex w-[84px] shrink-0 flex-col items-center gap-2">
+            <span className="grid size-[84px] place-items-center overflow-hidden rounded-full bg-surface-2 text-xl font-semibold text-fg-3">
+              {artistPhotos.get(n) ? <img src={artistPhotos.get(n)} alt="" className="size-full object-cover" /> : n[0]}
+            </span>
+            <span className="w-full truncate text-center text-[13px] text-fg-2">{n}</span>
+          </button>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/** A wide picture card: starts an endless radio from what was played, or from today's trending songs. */
+function Banner({ trending, seed }: { trending: Track[]; seed?: Track }) {
+  const startRadio = usePlayer((s) => s.startRadio);
+  const cover = (seed ?? trending[0])?.art;
+  const go = () => {
+    const s = seed ?? trending[0];
+    if (s) void startRadio(s);
+  };
+  return (
+    <Section title="New Album">
+      <button type="button" onClick={go} className="relative mx-4 block h-52 w-[calc(100%-32px)] overflow-hidden rounded-3xl bg-surface-3 text-left md:mx-6 md:w-[calc(100%-48px)]">
+        {cover && <img src={cover} alt="" className="absolute inset-0 size-full object-cover" />}
+        <span className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
+        <span className="absolute inset-x-5 bottom-4 flex items-end justify-between gap-3 text-white">
+          <span>
+            <span className="block text-lg font-semibold">Listen to the best music today</span>
+            <span className="block text-xs text-white/75">Endless radio picked for you</span>
+          </span>
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-white/25 backdrop-blur-md">
+            <PlayIcon size={20} weight="fill" />
+          </span>
+        </span>
+      </button>
+    </Section>
+  );
+}
+
+/** Recently played: square covers in a row, with a play badge. */
+function RecentRow({ tracks }: { tracks: Track[] }) {
+  const playList = usePlayer((s) => s.playList);
   const t = useT();
-  const f = t.home.feed.forYou;
+  if (!tracks.length) return null;
+  return (
+    <Section
+      title={t.nav.recentlyPlayed}
+      action={
+        <Link to={paths.history} className="text-sm font-medium text-fg-3">
+          {t.home.seeAll}
+        </Link>
+      }
+    >
+      <div className="no-scrollbar flex gap-4 overflow-x-auto px-4 md:px-6">
+        {tracks.slice(0, 12).map((tr, i) => (
+          <button key={tr.id + i} type="button" onClick={() => playList(tracks, i)} className="flex w-[150px] shrink-0 flex-col gap-2 text-left">
+            <span className="relative block">
+              <Artwork src={tr.art} fallback={tr.thumb} alt="" className="aspect-square w-full rounded-2xl" />
+              <span className="absolute inset-0 grid place-items-center">
+                <span className="grid size-9 place-items-center rounded-full bg-black/35 text-white backdrop-blur-sm">
+                  <PlayIcon size={16} weight="fill" />
+                </span>
+              </span>
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold">{tr.title}</span>
+              <span className="block truncate text-xs text-fg-3">{tr.artist}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/** Home's "for you" block, in the order of the design: Top Artist, banner, Recently Played, genres, picks. */
+export function ForYou() {
   const history = useLibrary((s) => s.history);
   const favorites = useLibrary((s) => s.favorites);
   const playList = usePlayer((s) => s.playList);
-  const startRadio = usePlayer((s) => s.startRadio);
   const seed: Track | undefined = history[0] ?? favorites[0];
   const [picks, setPicks] = useState<Track[]>([]);
   const [trending, setTrending] = useState<Track[]>([]);
-  const artist = history.find((h) => h.artist)?.artist;
   const [because, setBecause] = useState<Track[]>([]);
+  const artist = history.find((h) => h.artist)?.artist;
 
   useEffect(() => {
     const ctl = new AbortController();
     (seed ? api.radio(seed.id) : api.discoverShelf("sp-hits", ctl.signal).then((s) => s.tracks)).then(
-      (r) => !ctl.signal.aborted && setPicks(r.slice(0, 8)),
+      (r) => !ctl.signal.aborted && setPicks((r ?? []).slice(0, 8)),
       () => {},
     );
-    api.discoverShelf("yt-trending", ctl.signal).then((s) => setTrending(s.tracks), () => {});
-    if (artist)
-      api.search(artist, "song", ctl.signal).then((r) => setBecause(r.slice(0, 6)), () => {});
+    api.discoverShelf("yt-trending", ctl.signal).then((s) => setTrending(s.tracks ?? []), () => {});
+    if (artist) api.search(artist, "song", ctl.signal).then((r) => setBecause((r ?? []).slice(0, 6)), () => {});
     return () => ctl.abort();
   }, [seed?.id, artist]);
 
-  const startRadioNow = () => {
-    const s = seed ?? trending[0];
-    if (s) void startRadio(s);
-  };
   const vibe = async (q: string) => {
     try {
       const r = await api.search(`${q} music`, "song");
@@ -79,71 +161,29 @@ export function ForYou() {
       /* offline */
     }
   };
-  const tile = "flex h-16 items-center gap-3 rounded-[20px] bg-surface-2 pr-4 pl-2.5 text-sm font-semibold transition-transform active:scale-[0.97]";
-  const icon = (c: string) => `grid size-11 shrink-0 place-items-center rounded-[14px] ${c}`;
 
   return (
     <div className="flex flex-col gap-7">
-      <button
-        type="button"
-        onClick={startRadioNow}
-        className="relative mx-4 flex min-h-36 items-end justify-between gap-4 overflow-hidden rounded-[32px] bg-linear-to-br from-accent/45 via-accent/15 to-surface-2 p-6 text-left md:mx-6"
-      >
-        <RadioIcon size={120} weight="fill" className="pointer-events-none absolute -top-4 right-16 text-accent/15" />
-        <span className="relative min-w-0">
-          <span className="block text-2xl font-bold tracking-tight">{f.radio}</span>
-          <span className="mt-1 block text-sm text-fg-2">{f.radioSub}</span>
-        </span>
-        <span className="relative grid size-14 shrink-0 place-items-center rounded-full bg-accent text-accent-ink shadow-[0_10px_28px_color-mix(in_srgb,var(--accent)_45%,transparent)]">
-          <PlayIcon size={26} weight="fill" />
-        </span>
-      </button>
-
-      <Section title={f.quick}>
-        <div className="grid grid-cols-2 gap-2.5 px-4 md:grid-cols-4 md:px-6">
-          <Link to={paths.favorites} className={tile}>
-            <span className={icon("bg-rose-500/25 text-rose-300")}><HeartIcon size={22} weight="fill" /></span>
-            {f.liked}
-          </Link>
-          <Link to={paths.search} className={tile}>
-            <span className={icon("bg-sky-500/25 text-sky-300")}><CompassIcon size={22} weight="fill" /></span>
-            {f.discover}
-          </Link>
-          <button type="button" onClick={() => trending.length && playList(trending, 0)} className={cn(tile, "text-left")}>
-            <span className={icon("bg-violet-500/25 text-violet-300")}><ShuffleIcon size={22} weight="fill" /></span>
-            {f.mix}
-          </button>
-          <Link to={paths.downloads} className={tile}>
-            <span className={icon("bg-emerald-500/25 text-emerald-300")}><DownloadSimpleIcon size={22} weight="fill" /></span>
-            {f.downloads}
-          </Link>
-        </div>
-      </Section>
-
-      <Section title={f.sound}>
-        <div className="no-scrollbar flex gap-2.5 overflow-x-auto px-4 md:px-6">
-          {VIBES.map(([k, q, Icon, grad]) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => vibe(q)}
-              className={cn("flex h-24 w-28 shrink-0 flex-col justify-between rounded-[22px] bg-linear-to-br p-3 text-left transition-transform active:scale-95", grad)}
-            >
-              <Icon size={26} weight="fill" />
-              <span className="text-sm font-semibold">{f.vibes[k as keyof typeof f.vibes]}</span>
+      <TopArtists />
+      <Banner trending={trending} seed={seed} />
+      <RecentRow tracks={history} />
+      <Section title="Genres">
+        <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 md:px-6">
+          {GENRES.map(([label, q]) => (
+            <button key={label} type="button" onClick={() => vibe(q)} className="h-9 shrink-0 rounded-lg border border-accent/50 px-4 text-sm font-medium text-accent-text active:bg-accent-soft">
+              {label}
             </button>
           ))}
         </div>
       </Section>
-
       {picks.length > 0 && (
-        <Section title={f.picks}>
-          <div className="grid grid-cols-1 gap-2 px-4 sm:grid-cols-2 md:px-6">
+        <Section title="Just For You">
+          <div className="no-scrollbar flex gap-4 overflow-x-auto px-4 md:px-6">
             {picks.map((p, i) => (
-              <button key={p.id} type="button" onClick={() => playList(picks, i)} className="flex min-w-0 items-center gap-3 rounded-2xl bg-surface-1 p-2 text-left active:scale-[0.98]">
-                <Artwork src={p.art} alt="" className="size-14 shrink-0 rounded-xl" />
+              <button key={p.id} type="button" onClick={() => playList(picks, i)} className="flex w-[130px] shrink-0 flex-col gap-2 text-left">
+                <Artwork src={p.art} fallback={p.thumb} alt="" className="aspect-square w-full rounded-2xl" />
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-medium">{p.title}</span>
+                  <span className="block truncate text-sm font-semibold">{p.title}</span>
                   <span className="block truncate text-xs text-fg-3">{p.artist}</span>
                 </span>
               </button>
@@ -151,9 +191,8 @@ export function ForYou() {
           </div>
         </Section>
       )}
-
       {artist && because.length > 0 && (
-        <Section title={f.because(artist)}>
+        <Section title={`Because you listened to ${artist}`}>
           <TrackList tracks={because} header={false} />
         </Section>
       )}

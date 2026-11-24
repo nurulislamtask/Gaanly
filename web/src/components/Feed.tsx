@@ -237,6 +237,7 @@ export function Feed() {
 
   return (
     <div className="flex flex-col gap-8">
+      {showHero && <ForYou />}
       <div className="flex items-center gap-2">
         <div className="no-scrollbar flex flex-1 gap-2 overflow-x-auto px-4 md:px-6" role="tablist">
           {CHIPS.map((c) => (
@@ -269,7 +270,6 @@ export function Feed() {
         </button>
       </div>
 
-      {showHero && <ForYou />}
       {showHero && <Hero onTracks={setHero} />}
 
       {rows.map(({ def, key, view }) => (
