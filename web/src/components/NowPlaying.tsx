@@ -364,7 +364,7 @@ export function NowPlayingSheet({ open, onClose }: { open: boolean; onClose: () 
             ) : (
               <div className="flex min-h-0 flex-1 flex-col gap-4 pb-[calc(16px+env(safe-area-inset-bottom))]">
                 <div className="relative min-h-0 flex-1 touch-none" onPointerDown={(e) => drag.start(e)}>
-                  <div className="absolute inset-0 grid place-items-center">
+                  <div className="absolute inset-0 grid place-items-center [container-type:size]">
                     {showsVideo ? (
                       <Stage track={track} slot={SLOT.sheet} />
                     ) : (
@@ -373,7 +373,7 @@ export function NowPlayingSheet({ open, onClose }: { open: boolean; onClose: () 
                         fallback={track.thumb}
                         alt={t.nowPlaying.coverOf(track.title)}
                         iconSize={48}
-                        className="aspect-square h-full max-w-full rounded-[28px] shadow-[0_24px_60px_rgb(0_0_0/0.5)] ring-1 ring-white/10"
+                        className="size-[min(100cqw,100cqh)] rounded-[28px] shadow-[0_24px_60px_rgb(0_0_0/0.5)] ring-1 ring-white/10"
                       />
                     )}
                   </div>
