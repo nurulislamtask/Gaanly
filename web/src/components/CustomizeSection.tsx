@@ -150,7 +150,7 @@ export function LayoutSection() {
 }
 
 const SWATCH: Record<string, [string, string, string]> = {
-  ocean: ["#07162e", "#13233e", "#243a5e"],
+  ocean: ["#14112b", "#241f48", "#3a3468"],
   midnight: ["#000000", "#121216", "#26262e"],
   graphite: ["#121315", "#212429", "#373c44"],
   plum: ["#170b22", "#2a1639", "#472a60"],
@@ -159,6 +159,14 @@ const SWATCH: Record<string, [string, string, string]> = {
   crimson: ["#1a0a0d", "#31141b", "#56242f"],
   mocha: ["#17110d", "#2b211a", "#4a392d"],
   slate: ["#0e1218", "#1c2431", "#333f52"],
+  teal: ["#06191a", "#102e30", "#235758"],
+  rose: ["#1c0b14", "#341626", "#5a2a44"],
+  indigo: ["#0c0d24", "#1a1d3f", "#323669"],
+  cyan: ["#07171d", "#112c35", "#235261"],
+  amber: ["#1a1306", "#31240d", "#58441b"],
+  lime: ["#0f1706", "#1d2c0e", "#37531c"],
+  violet: ["#14092a", "#26144d", "#442688"],
+  ice: ["#0b141c", "#182735", "#2f4960"],
 };
 
 /** Theme cards: the dark surface colours, each shown as three bars. */
@@ -185,7 +193,7 @@ export function PalettePicker() {
               )}
             >
               <span className="flex h-9 w-11 shrink-0 items-end gap-0.5 rounded-[8px] bg-black/30 p-1">
-                {SWATCH[id]!.map((c) => (
+                {(SWATCH[id] ?? []).map((c) => (
                   <span key={c} className="h-full flex-1 rounded-[3px]" style={{ background: c }} />
                 ))}
               </span>

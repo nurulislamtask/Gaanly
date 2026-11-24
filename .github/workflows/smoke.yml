@@ -41,10 +41,17 @@ jobs:
             await p.goto("http://localhost:4173/");
             await p.waitForTimeout(12000);
             console.log("ROOT CHILDREN", await p.evaluate(() => document.getElementById("root").childElementCount));
-            await p.screenshot({ path: "/tmp/pw/home.png" });
             await p.evaluate(() => document.querySelector("main").scrollTo(0, 700));
             await p.waitForTimeout(800);
             await p.screenshot({ path: "/tmp/pw/home2.png" });
+            await p.evaluate(() => {
+              const sv = (c) => "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${c}'/><stop offset='1' stop-color='#1b1030'/></linearGradient></defs><rect width='600' height='600' fill='url(#g)'/></svg>`);
+              const cols = ["#e0457b", "#2dd4bf", "#f59e0b", "#6c3df4", "#38bdf8", "#f43f5e"];
+              const hist = cols.map((c, i) => ({ id: "h" + i, title: "Song number " + i, artist: ["Arijit Singh", "Atif Aslam", "Hamza Malik"][i % 3], album: "A", duration: 200, thumb: sv(c), art: sv(c), kind: "song" }));
+              window.__gaanly.useLibrary.setState({ history: hist, favorites: hist.slice(0, 3), status: "ready" });
+            });
+            await p.waitForTimeout(3000);
+            await p.screenshot({ path: "/tmp/pw/home.png" });
             await p.evaluate(() => {
               const svg = (c) => "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${c}'/><stop offset='1' stop-color='#1b1030'/></linearGradient></defs><rect width='600' height='600' fill='url(#g)'/></svg>`);
               const mk = (i, c) => ({ id: "dQw4w9WgXc" + i, title: "Tera Hua Sahiba " + i, artist: "Garvit Soni, Priyansh", album: "Single", duration: 215, thumb: svg(c), art: svg(c), kind: "song" });

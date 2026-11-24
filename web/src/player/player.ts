@@ -709,4 +709,4 @@ export function setFadeLevel(level: number) {
 }
 
 // Lets the automated screenshot test drive the player.
-(globalThis as { __gaanly?: unknown }).__gaanly = { usePlayer };
+(globalThis as { __gaanly?: unknown }).__gaanly = { usePlayer, useLibrary };
