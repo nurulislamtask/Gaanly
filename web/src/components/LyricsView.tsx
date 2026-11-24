@@ -223,7 +223,10 @@ export function LyricsView({ className, full = false }: { className?: string; fu
               onClick={() => setPicked(i)}
               className={cn("block w-full py-1 text-[17px] leading-7 font-medium", full && "text-left text-[22px] leading-9", picked === i ? "text-accent-text" : "text-fg")}
             >
-              {l || " "}
+              {view.original || !en?.romanized[i] ? l || "\u00a0" : en.romanized[i]}
+              {view.original && view.banglish && en?.romanized[i] && <span className="block text-[0.7em] opacity-70">{en.romanized[i]}</span>}
+              {view.english && en?.translation[i] && <span className="block text-[0.7em] text-accent-text">{en.translation[i]}</span>}
+              {view.bangla && bn?.translation[i] && <span className="block text-[0.7em] text-accent-text">{bn.translation[i]}</span>}
             </button>
           ))
         )}
