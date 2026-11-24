@@ -1,7 +1,7 @@
 {
   "name": "gaanly",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
   "scripts": {
     "dev": "pnpm --parallel --filter ./server --filter ./web dev",
