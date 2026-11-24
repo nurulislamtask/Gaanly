@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: v1.3.0
       - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v5
         with:
