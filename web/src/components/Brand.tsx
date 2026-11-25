@@ -1,21 +1,18 @@
 import { cn } from "../lib/format";
 
-/** The Gaanly mark: headphones around a little equalizer. */
+/** The Gaanly mark: a "g" whose bowl holds a three-bar equalizer. One color (currentColor). */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="86 118 340 322" className={className} aria-hidden="true">
-      <defs>
-        <linearGradient id="gaanly-bars" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#FFC24A" />
-          <stop offset="1" stopColor="#FF5C7A" />
-        </linearGradient>
-      </defs>
-      <path d="M134 330V268A122 122 0 0 1 378 268V330" fill="none" stroke="currentColor" strokeWidth="34" strokeLinecap="round" />
-      <rect x="92" y="296" width="86" height="138" rx="40" fill="currentColor" />
-      <rect x="334" y="296" width="86" height="138" rx="40" fill="currentColor" />
-      <rect x="206" y="330" width="26" height="76" rx="13" fill="url(#gaanly-bars)" />
-      <rect x="243" y="292" width="26" height="150" rx="13" fill="url(#gaanly-bars)" />
-      <rect x="280" y="318" width="26" height="100" rx="13" fill="url(#gaanly-bars)" />
+    <svg viewBox="104 104 292 328" className={className} aria-hidden="true">
+      <g fill="none" stroke="currentColor" strokeWidth="46" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="232" cy="226" r="86" />
+        <path d="M356 150V312C356 366 318 396 262 396H214" />
+      </g>
+      <g fill="currentColor">
+        <rect x="205" y="214" width="14" height="26" rx="7" />
+        <rect x="225" y="188" width="14" height="78" rx="7" />
+        <rect x="245" y="205" width="14" height="44" rx="7" />
+      </g>
     </svg>
   );
 }

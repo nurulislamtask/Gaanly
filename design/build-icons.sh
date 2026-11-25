@@ -4,41 +4,29 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-BG_COLOR="#07162E"
-GLYPH='<path d="M134 330V268A122 122 0 0 1 378 268V330" fill="none" stroke="url(#n)" stroke-width="34" stroke-linecap="round"/>
-<rect x="92" y="296" width="86" height="138" rx="40" fill="url(#n)"/>
-<rect x="334" y="296" width="86" height="138" rx="40" fill="url(#n)"/>
-<rect x="206" y="330" width="26" height="76" rx="13" fill="url(#b)"/>
-<rect x="243" y="292" width="26" height="150" rx="13" fill="url(#b)"/>
-<rect x="280" y="318" width="26" height="100" rx="13" fill="url(#b)"/>'
-DEFS='<defs>
-<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D2A57"/><stop offset="0.55" stop-color="#0E5C73"/><stop offset="1" stop-color="#12A59A"/></linearGradient>
-<linearGradient id="n" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#CFF5EE"/></linearGradient>
-<linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFC24A"/><stop offset="1" stop-color="#FF5C7A"/></linearGradient>
-<radialGradient id="glow" cx="0.25" cy="0.15" r="0.8"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.28"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
-<filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#021428" flood-opacity="0.4"/></filter>
-</defs>'
-# the headphones' visual center is ~(256,278)
-glyph() { # $1 = scale
-  echo "<g filter=\"url(#sh)\" transform=\"translate(256 256) scale($1) translate(-256 -278)\">$GLYPH</g>"
+BG_COLOR="#14112B"
+ACCENT="#6c3df4"
+# The mark: a "g" whose bowl holds a three-bar equalizer. One color on purple, no gradients.
+GLYPH='<g fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"><circle cx="232" cy="226" r="86"/><path d="M356 150V312C356 366 318 396 262 396H214"/></g>
+<g fill="#fff"><rect x="205" y="214" width="14" height="26" rx="7"/><rect x="225" y="188" width="14" height="78" rx="7"/><rect x="245" y="205" width="14" height="44" rx="7"/></g>'
+glyph() { # $1 = scale; the mark's visual center is ~(251,268)
+  echo "<g transform=\"translate(256 256) scale($1) translate(-251 -268)\">$GLYPH</g>"
 }
 # tile RX SCALE [bg:yes|no]
 tile() {
   local rx=$1 sc=$2 bg=${3:-yes}
-  echo "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\">$DEFS"
-  if [ "$bg" = yes ]; then
-    echo "<rect width=\"512\" height=\"512\" rx=\"$rx\" fill=\"url(#bg)\"/><rect width=\"512\" height=\"512\" rx=\"$rx\" fill=\"url(#glow)\"/>"
-  fi
+  echo "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\">"
+  if [ "$bg" = yes ]; then echo "<rect width=\"512\" height=\"512\" rx=\"$rx\" fill=\"$ACCENT\"/>"; fi
   glyph "$sc"; echo "</svg>"
 }
 png() { rsvg-convert -w "$2" -h "$2" "$1" -o "$3"; }
 
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
-tile 116 1.12 > "$T/round.svg"        # rounded app tile
-tile 0   1.05 > "$T/full.svg"         # full-bleed (iOS, apple-touch)
-tile 0   0.86 > "$T/maskable.svg"     # full-bleed, glyph inside the 80% safe zone
-tile 256 1.0  > "$T/circle.svg"       # circular legacy Android icon
-cp "$T/maskable.svg" "$T/fg.svg"      # Android adaptive foreground: full-bleed gradient, note inside the safe zone
+tile 116 1.0 > "$T/round.svg"        # rounded app tile
+tile 0   1.0 > "$T/full.svg"         # full-bleed (iOS, apple-touch)
+tile 0   0.8 > "$T/maskable.svg"     # full-bleed, glyph inside the 80% safe zone
+tile 256 0.9  > "$T/circle.svg"       # circular legacy Android icon
+cp "$T/maskable.svg" "$T/fg.svg"      # Android adaptive foreground: full-bleed purple, note inside the safe zone
 cp "$T/round.svg" design/logo.svg
 
 # ---- web / PWA

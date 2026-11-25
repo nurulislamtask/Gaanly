@@ -1,3 +1,4 @@
+import { LogoMark } from "./Brand";
 import { PlayIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
@@ -70,22 +71,20 @@ function TopArtists() {
 /** A wide picture card: starts an endless radio from what was played, or from today's trending songs. */
 function Banner({ trending, seed }: { trending: Track[]; seed?: Track }) {
   const startRadio = usePlayer((s) => s.startRadio);
-  const cover = (seed ?? trending[0])?.art;
   const go = () => {
     const s = seed ?? trending[0];
     if (s) void startRadio(s);
   };
   return (
     <Section title="New Album">
-      <button type="button" onClick={go} className="relative mx-4 block h-52 w-[calc(100%-32px)] overflow-hidden rounded-3xl bg-surface-3 text-left md:mx-6 md:w-[calc(100%-48px)]">
-        {cover && <img src={cover} alt="" className="absolute inset-0 size-full object-cover" />}
-        <span className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
+      <button type="button" onClick={go} className="relative mx-4 block h-52 w-[calc(100%-32px)] overflow-hidden rounded-3xl bg-linear-to-br from-accent to-[color-mix(in_oklab,var(--accent)_45%,black)] text-left md:mx-6 md:w-[calc(100%-48px)]">
+        <LogoMark className="absolute -right-6 -top-4 h-48 text-white/10" />
         <span className="absolute inset-x-5 bottom-4 flex items-end justify-between gap-3 text-white">
           <span>
             <span className="block text-lg font-semibold">Listen to the best music today</span>
             <span className="block text-xs text-white/75">Endless radio picked for you</span>
           </span>
-          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-white/25 backdrop-blur-md">
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-white text-accent">
             <PlayIcon size={20} weight="fill" />
           </span>
         </span>
