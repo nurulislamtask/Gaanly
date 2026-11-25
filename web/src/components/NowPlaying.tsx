@@ -349,7 +349,7 @@ export function NowPlayingSheet({ open, onClose }: { open: boolean; onClose: () 
         >
           
 
-          <div className="overlay-top relative flex flex-1 flex-col px-5">
+          <div className="overlay-top relative flex min-h-0 flex-1 flex-col px-5">
             <div className="flex h-16 touch-none items-center gap-2" onPointerDown={(e) => drag.start(e)}>
               <IconButton label={t.common.close} onClick={onClose} className="size-11! rounded-full! bg-surface-2 text-fg">
                 <CaretDownIcon size={22} />

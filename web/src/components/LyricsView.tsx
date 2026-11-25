@@ -123,6 +123,15 @@ export function LyricsView({ className, full = false }: { className?: string; fu
     setTimeout(() => (programmatic.current = false), 700);
   };
 
+  // The reader took over scrolling; after a few quiet seconds the lyrics follow the song again.
+  const resume = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const userScrolled = () => {
+    setDetached(true);
+    clearTimeout(resume.current);
+    resume.current = setTimeout(() => setDetached(false), 4000);
+  };
+  useEffect(() => () => clearTimeout(resume.current), []);
+
   useEffect(() => {
     if (!detached) center(active);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -178,7 +187,9 @@ export function LyricsView({ className, full = false }: { className?: string; fu
 
       <div
         ref={box}
-        onScroll={() => !programmatic.current && setDetached(true)}
+        onWheel={userScrolled}
+        onTouchMove={userScrolled}
+        onPointerDown={userScrolled}
         className={cn("scroll-area relative flex-1 overflow-y-auto", full ? "px-1 pt-[18%] pb-[60%]" : "px-3 py-[30%] text-center")}
       >
         {synced.length ? (
